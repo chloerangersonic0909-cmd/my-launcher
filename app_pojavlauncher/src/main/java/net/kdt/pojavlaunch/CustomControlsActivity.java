@@ -57,8 +57,6 @@ public class CustomControlsActivity extends BaseActivity implements EditorExitab
 						shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
 						shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 						shareIntent.setType("application/json");
-						startActivity(shareIntent);
-
 						Intent sendIntent = Intent.createChooser(shareIntent, mControlLayout.mLayoutFileName);
 						startActivity(sendIntent);
 					}catch (Exception e) {
