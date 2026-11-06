@@ -78,20 +78,20 @@ public class DownloadCenterFragment extends Fragment {
         appContext = context.getApplicationContext();
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(Color.rgb(8, 12, 23));
+        scroll.setBackgroundColor(Color.rgb(244, 255, 241));
 
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(18), dp(14), dp(18), dp(18));
         scroll.addView(root);
 
-        Button back = makeButton("←  กลับหน้าแรก", "#1D2A42");
+        Button back = makeButton("←  กลับหน้าแรก", "#DFFFD8");
         back.setOnClickListener(v -> Tools.backToMainMenu(requireActivity()));
         root.addView(back, matchWrap());
 
         TextView title = new TextView(context);
         title.setText("MY LAUNCHER  /  DOWNLOAD CENTER");
-        title.setTextColor(Color.rgb(112, 204, 255));
+        title.setTextColor(Color.rgb(32, 201, 0));
         title.setTextSize(20);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         title.setPadding(0, dp(18), 0, dp(4));
@@ -99,16 +99,16 @@ public class DownloadCenterFragment extends Fragment {
 
         TextView subtitle = new TextView(context);
         subtitle.setText("นำเข้าไฟล์เสริมจากอุปกรณ์ และติดตั้งลงในโปรไฟล์ Minecraft ที่เลือก");
-        subtitle.setTextColor(Color.LTGRAY);
+        subtitle.setTextColor(Color.rgb(91, 112, 87));
         subtitle.setTextSize(13);
         root.addView(subtitle, matchWrap());
 
         TextView selected = new TextView(context);
         selected.setText("ปลายทาง: โปรไฟล์ Minecraft ปัจจุบัน");
-        selected.setTextColor(Color.WHITE);
+        selected.setTextColor(Color.rgb(20, 35, 19));
         selected.setTextSize(12);
         selected.setPadding(dp(12), dp(10), dp(12), dp(10));
-        selected.setBackground(panelBackground("#14243A"));
+        selected.setBackground(panelBackground("#E5FFE0"));
         LinearLayout.LayoutParams selectedParams = matchWrap();
         selectedParams.topMargin = dp(12);
         root.addView(selected, selectedParams);
@@ -120,12 +120,12 @@ public class DownloadCenterFragment extends Fragment {
         modpackSearchInput.setSingleLine(true);
         modpackSearchInput.setHint("ค้นหา Modpack บน Modrinth / CurseForge");
         modpackSearchInput.setHintTextColor(Color.GRAY);
-        modpackSearchInput.setTextColor(Color.WHITE);
+        modpackSearchInput.setTextColor(Color.rgb(20, 35, 19));
         modpackSearchInput.setTextSize(13);
         modpackSearchInput.setPadding(dp(10), 0, dp(10), 0);
-        modpackSearchInput.setBackground(panelBackground("#111D31"));
+        modpackSearchInput.setBackground(panelBackground("#FFFFFF"));
         searchRow.addView(modpackSearchInput, new LinearLayout.LayoutParams(0, dp(48), 1f));
-        Button searchButton = makeButton("ค้นหา", "#126A9B");
+        Button searchButton = makeButton("ค้นหา", "#39FF14");
         LinearLayout.LayoutParams searchButtonParams = new LinearLayout.LayoutParams(dp(104), dp(48));
         searchButtonParams.leftMargin = dp(8);
         searchRow.addView(searchButton, searchButtonParams);
@@ -153,7 +153,7 @@ public class DownloadCenterFragment extends Fragment {
         addSection(root, "IMPORT STATUS");
         statusText = new TextView(context);
         statusText.setText("พร้อมนำเข้าไฟล์");
-        statusText.setTextColor(Color.WHITE);
+        statusText.setTextColor(Color.rgb(20, 35, 19));
         statusText.setTextSize(13);
         statusText.setPadding(dp(12), dp(12), dp(12), dp(8));
         root.addView(statusText, matchWrap());
@@ -163,7 +163,7 @@ public class DownloadCenterFragment extends Fragment {
         progressBar.setProgress(0);
         root.addView(progressBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(6)));
 
-        cancelButton = makeButton("หยุดการนำเข้า", "#7A2637");
+        cancelButton = makeButton("หยุดการนำเข้า", "#FADBD8");
         cancelButton.setEnabled(false);
         cancelButton.setOnClickListener(v -> cancelImport());
         LinearLayout.LayoutParams cancelParams = matchWrap();
@@ -172,7 +172,7 @@ public class DownloadCenterFragment extends Fragment {
 
         TextView note = new TextView(context);
         note.setText("หมายเหตุ: เลือกไฟล์จากแหล่งที่เชื่อถือได้เท่านั้น ตรวจสอบเวอร์ชัน Minecraft และ Mod Loader ให้ตรงกันก่อนเล่น");
-        note.setTextColor(Color.rgb(160, 174, 195));
+        note.setTextColor(Color.rgb(91, 112, 87));
         note.setTextSize(11);
         note.setPadding(0, dp(14), 0, dp(8));
         root.addView(note);
@@ -189,7 +189,7 @@ public class DownloadCenterFragment extends Fragment {
             modpackResults.removeAllViews();
             TextView loading = new TextView(requireContext());
             loading.setText("กำลังค้นหา Modpack จาก Modrinth และ CurseForge…");
-            loading.setTextColor(Color.LTGRAY);
+            loading.setTextColor(Color.rgb(91, 112, 87));
             modpackResults.addView(loading);
         }
         final String targetVersion;
@@ -246,7 +246,7 @@ public class DownloadCenterFragment extends Fragment {
         if (result == null || result.results == null || result.results.length == 0) {
             TextView empty = new TextView(requireContext());
             empty.setText("ไม่พบ Modpack หรือบริการค้นหาไม่พร้อมใช้งาน");
-            empty.setTextColor(Color.LTGRAY);
+            empty.setTextColor(Color.rgb(91, 112, 87));
             modpackResults.addView(empty);
             return;
         }
@@ -614,7 +614,7 @@ public class DownloadCenterFragment extends Fragment {
     private void addSection(LinearLayout root, String label) {
         TextView section = new TextView(requireContext());
         section.setText(label);
-        section.setTextColor(Color.rgb(91, 188, 255));
+        section.setTextColor(Color.rgb(32, 201, 0));
         section.setTextSize(11);
         section.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         section.setPadding(0, dp(18), 0, dp(6));
@@ -625,16 +625,16 @@ public class DownloadCenterFragment extends Fragment {
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(dp(14), dp(10), dp(14), dp(10));
-        card.setBackground(panelBackground("#111D31"));
+        card.setBackground(panelBackground("#FFFFFF"));
         TextView heading = new TextView(requireContext());
         heading.setText(title);
-        heading.setTextColor(Color.WHITE);
+        heading.setTextColor(Color.rgb(20, 35, 19));
         heading.setTextSize(15);
         heading.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         card.addView(heading, matchWrap());
         TextView detail = new TextView(requireContext());
         detail.setText(description);
-        detail.setTextColor(Color.LTGRAY);
+        detail.setTextColor(Color.rgb(91, 112, 87));
         detail.setTextSize(11);
         LinearLayout.LayoutParams detailParams = matchWrap();
         detailParams.topMargin = dp(3);
@@ -648,7 +648,7 @@ public class DownloadCenterFragment extends Fragment {
     private Button makeButton(String text, String color) {
         Button button = new Button(requireContext());
         button.setText(text);
-        button.setTextColor(Color.WHITE);
+        button.setTextColor(Color.rgb(20, 35, 19));
         button.setTextSize(12);
         button.setAllCaps(false);
         button.setBackground(panelBackground(color));
@@ -659,7 +659,7 @@ public class DownloadCenterFragment extends Fragment {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(Color.parseColor(color));
         drawable.setCornerRadius(dp(12));
-        drawable.setStroke(dp(1), Color.rgb(35, 65, 96));
+        drawable.setStroke(dp(1), Color.rgb(205, 239, 198));
         return drawable;
     }
 
