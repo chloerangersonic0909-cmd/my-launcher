@@ -48,4 +48,19 @@
 
 
 
+
+    <TextView
+        android:id="@+id/launcher_version_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:text="My Launcher • v@string/app_version"
+        android:textColor="@color/secondary_text"
+        android:textSize="10sp"
+        android:alpha="0.85"
+        android:importantForAccessibility="no"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/progress_layout" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
