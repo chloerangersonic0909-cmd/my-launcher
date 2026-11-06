@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_4sdp"
-        android:text="My Launcher • v@string/app_version"
+        android:text="@string/app_version_label"
         android:textColor="@color/secondary_text"
         android:textSize="10sp"
         android:alpha="0.85"
