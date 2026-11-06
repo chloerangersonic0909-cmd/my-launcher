@@ -195,7 +195,7 @@ public class DownloadCenterFragment extends Fragment {
         final String targetVersion;
         try {
             String selected = LauncherProfiles.getCurrentProfile().lastVersionId;
-            targetVersion = selected == null ? null : AsyncMinecraftDownloader.normalizeVersionId(selected);
+            targetVersion = resolveMinecraftVersion(selected);
         } catch (Exception e) {
             postStatus("ยังไม่มีโปรไฟล์ Minecraft ที่เลือก", 0, false);
             return;
@@ -214,6 +214,30 @@ public class DownloadCenterFragment extends Fragment {
                 postStatus("ค้นหาไม่สำเร็จ: " + e.getMessage(), 0, false);
             }
         });
+    }
+
+    private String resolveMinecraftVersion(String versionId) {
+        if (versionId == null || versionId.isEmpty()) return null;
+        String normalized = AsyncMinecraftDownloader.normalizeVersionId(versionId);
+        if (normalized == null) return null;
+
+        int forgeIndex = normalized.indexOf("-forge-");
+        if (forgeIndex > 0) return normalized.substring(0, forgeIndex);
+
+        if (normalized.startsWith("fabric-loader-") || normalized.startsWith("quilt-loader-")) {
+            int lastDash = normalized.lastIndexOf('-');
+            if (lastDash > 0 && lastDash < normalized.length() - 1) {
+                return normalized.substring(lastDash + 1);
+            }
+        }
+
+        if (normalized.startsWith("neoforge-")) {
+            java.util.regex.Matcher matcher = java.util.regex.Pattern
+                    .compile("^neoforge-(\\d+)\\.(\\d+)\\..*$")
+                    .matcher(normalized);
+            if (matcher.matches()) return "1." + matcher.group(1) + "." + matcher.group(2);
+        }
+        return normalized;
     }
 
     private void renderModpackResults(SearchResult result, String targetVersion) {
