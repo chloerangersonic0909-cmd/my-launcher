@@ -565,6 +565,7 @@ public class ControlLayout extends FrameLayout {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle(R.string.customctrl_selectdefault);
 		builder.setPositiveButton(android.R.string.cancel, null);
+		builder.setNeutralButton(R.string.customctrl_restore_default, null);
 
 		final AlertDialog dialog = builder.create();
 		FileListView flv = new FileListView(dialog, "json");
@@ -583,7 +584,53 @@ public class ControlLayout extends FrameLayout {
 			}
 		});
 		dialog.setView(flv);
+		dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
+			new AlertDialog.Builder(getContext())
+					.setTitle(R.string.customctrl_restore_default)
+					.setMessage(R.string.customctrl_restore_default_confirm)
+					.setNegativeButton(android.R.string.cancel, null)
+					.setPositiveButton(R.string.global_yes, (confirmDialog, which) -> {
+						try {
+							restoreBundledDefaultControls();
+							dialog.dismiss();
+						} catch (Exception e) {
+							Tools.showError(getContext(), e);
+						}
+					})
+					.show();
+		}));
 		dialog.show();
+	}
+
+	private void restoreBundledDefaultControls() throws IOException {
+		File target = new File(Tools.CTRLDEF_FILE);
+		File parent = target.getParentFile();
+		if (parent == null || (!parent.exists() && !parent.mkdirs())) {
+			throw new IOException("Unable to create control map directory");
+		}
+		File temporary = new File(parent, "default.json.restore.tmp");
+		try (java.io.InputStream input = getContext().getAssets().open("default.json");
+			 java.io.FileOutputStream output = new java.io.FileOutputStream(temporary, false)) {
+			byte[] buffer = new byte[8192];
+			int count;
+			while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+			output.getFD().sync();
+		} catch (IOException e) {
+			temporary.delete();
+			throw e;
+		}
+		if (target.exists() && !target.delete()) {
+			temporary.delete();
+			throw new IOException("Unable to replace the current default controls");
+		}
+		if (!temporary.renameTo(target)) {
+			temporary.delete();
+			throw new IOException("Unable to activate the restored default controls");
+		}
+		LauncherPreferences.DEFAULT_PREF.edit().putString("defaultCtrl", target.getAbsolutePath()).apply();
+		LauncherPreferences.PREF_DEFAULTCTRL_PATH = target.getAbsolutePath();
+		loadLayout(target.getAbsolutePath());
+		Toast.makeText(getContext(), R.string.customctrl_restore_default_done, Toast.LENGTH_SHORT).show();
 	}
 
 	public void openExitDialog(EditorExitable exitListener) {
