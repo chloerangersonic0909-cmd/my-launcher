@@ -30,6 +30,12 @@ import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
+import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
+import net.kdt.pojavlaunch.modloaders.modpacks.api.CommonApi;
+import net.kdt.pojavlaunch.modloaders.modpacks.models.ModDetail;
+import net.kdt.pojavlaunch.modloaders.modpacks.models.ModItem;
+import net.kdt.pojavlaunch.modloaders.modpacks.models.SearchFilters;
+import net.kdt.pojavlaunch.modloaders.modpacks.models.SearchResult;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +57,9 @@ public class DownloadCenterFragment extends Fragment {
     private TextView statusText;
     private ProgressBar progressBar;
     private Button cancelButton;
+    private android.widget.EditText modpackSearchInput;
+    private LinearLayout modpackResults;
+    private CommonApi modpackApi;
     private Future<?> activeTask;
     private volatile boolean importing;
     private Context appContext;
@@ -101,6 +110,31 @@ public class DownloadCenterFragment extends Fragment {
         selectedParams.topMargin = dp(12);
         root.addView(selected, selectedParams);
 
+        addSection(root, "ONLINE MODPACK CATALOG");
+        LinearLayout searchRow = new LinearLayout(context);
+        searchRow.setOrientation(LinearLayout.HORIZONTAL);
+        modpackSearchInput = new android.widget.EditText(context);
+        modpackSearchInput.setSingleLine(true);
+        modpackSearchInput.setHint("ค้นหา Modpack บน Modrinth / CurseForge");
+        modpackSearchInput.setHintTextColor(Color.GRAY);
+        modpackSearchInput.setTextColor(Color.WHITE);
+        modpackSearchInput.setTextSize(13);
+        modpackSearchInput.setPadding(dp(10), 0, dp(10), 0);
+        modpackSearchInput.setBackground(panelBackground("#111D31"));
+        searchRow.addView(modpackSearchInput, new LinearLayout.LayoutParams(0, dp(48), 1f));
+        Button searchButton = makeButton("ค้นหา", "#126A9B");
+        LinearLayout.LayoutParams searchButtonParams = new LinearLayout.LayoutParams(dp(104), dp(48));
+        searchButtonParams.leftMargin = dp(8);
+        searchRow.addView(searchButton, searchButtonParams);
+        root.addView(searchRow, matchWrap());
+        searchButton.setOnClickListener(v -> searchOnlineModpacks());
+
+        modpackResults = new LinearLayout(context);
+        modpackResults.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams resultsParams = matchWrap();
+        resultsParams.topMargin = dp(8);
+        root.addView(modpackResults, resultsParams);
+
         addSection(root, "MOD CONTENT");
         addCard(root, "🧩  Mods (.jar)", "นำไฟล์ Mod JAR ไปไว้ในโฟลเดอร์ mods", () -> chooseFile(ImportType.MOD));
         addCard(root, "✨  Shaders (.zip)", "นำ Shader Pack ไปไว้ในโฟลเดอร์ shaderpacks", () -> chooseFile(ImportType.SHADER));
@@ -140,6 +174,98 @@ public class DownloadCenterFragment extends Fragment {
         note.setPadding(0, dp(14), 0, dp(8));
         root.addView(note);
         return scroll;
+    }
+
+    private void searchOnlineModpacks() {
+        String query = modpackSearchInput == null ? "" : modpackSearchInput.getText().toString().trim();
+        if (query.isEmpty()) {
+            Toast.makeText(requireContext(), "พิมพ์ชื่อ Modpack ที่ต้องการค้นหาก่อน", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (modpackResults != null) {
+            modpackResults.removeAllViews();
+            TextView loading = new TextView(requireContext());
+            loading.setText("กำลังค้นหา Modpack จาก Modrinth และ CurseForge…");
+            loading.setTextColor(Color.LTGRAY);
+            modpackResults.addView(loading);
+        }
+        final String targetVersion;
+        try {
+            String selected = LauncherProfiles.getCurrentProfile().lastVersionId;
+            targetVersion = selected == null ? null : AsyncMinecraftDownloader.normalizeVersionId(selected);
+        } catch (Exception e) {
+            postStatus("ยังไม่มีโปรไฟล์ Minecraft ที่เลือก", 0, false);
+            return;
+        }
+        PojavApplication.sExecutorService.execute(() -> {
+            try {
+                if (modpackApi == null) modpackApi = new CommonApi(appContext.getString(R.string.curseforge_api_key));
+                SearchFilters filters = new SearchFilters();
+                filters.isModpack = true;
+                filters.name = query;
+                filters.mcVersion = targetVersion;
+                SearchResult result = modpackApi.searchMod(filters);
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> renderModpackResults(result, targetVersion));
+            } catch (Exception e) {
+                postStatus("ค้นหาไม่สำเร็จ: " + e.getMessage(), 0, false);
+            }
+        });
+    }
+
+    private void renderModpackResults(SearchResult result, String targetVersion) {
+        if (modpackResults == null) return;
+        modpackResults.removeAllViews();
+        if (result == null || result.results == null || result.results.length == 0) {
+            TextView empty = new TextView(requireContext());
+            empty.setText("ไม่พบ Modpack หรือบริการค้นหาไม่พร้อมใช้งาน");
+            empty.setTextColor(Color.LTGRAY);
+            modpackResults.addView(empty);
+            return;
+        }
+        for (ModItem item : result.results) {
+            addCard(modpackResults, "📦  " + item.title,
+                    item.description == null ? "Modpack" : item.description,
+                    v -> loadModpackVersions(item, targetVersion));
+        }
+    }
+
+    private void loadModpackVersions(ModItem item, String targetVersion) {
+        setStatus("กำลังตรวจสอบเวอร์ชันของ " + item.title, 0, true);
+        PojavApplication.sExecutorService.execute(() -> {
+            try {
+                ModDetail detail = modpackApi.getModDetails(item);
+                if (detail == null || detail.versionNames == null || detail.versionNames.length == 0) {
+                    postStatus("ไม่พบเวอร์ชันของ Modpack นี้", 0, false);
+                    return;
+                }
+                java.util.ArrayList<Integer> compatible = new java.util.ArrayList<>();
+                java.util.ArrayList<String> labels = new java.util.ArrayList<>();
+                for (int i = 0; i < detail.versionNames.length; i++) {
+                    String mc = detail.mcVersionNames[i];
+                    if (targetVersion == null || targetVersion.equals(mc)) {
+                        compatible.add(i);
+                        labels.add(detail.versionNames[i] + "  •  Minecraft " + mc);
+                    }
+                }
+                if (compatible.isEmpty()) {
+                    postStatus("ไม่พบเวอร์ชันที่ตรงกับ Minecraft " + targetVersion, 0, false);
+                    return;
+                }
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireContext())
+                        .setTitle("เลือกเวอร์ชัน • " + item.title)
+                        .setItems(labels.toArray(new String[0]), (dialog, which) -> {
+                            int selectedIndex = compatible.get(which);
+                            setStatus("กำลังติดตั้ง " + item.title + "… ดูความคืบหน้าได้จากแถบงานและการแจ้งเตือน", 0, true);
+                            modpackApi.handleInstallation(requireContext(), detail, selectedIndex);
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show());
+            } catch (Exception e) {
+                postStatus("อ่านรายละเอียด Modpack ไม่สำเร็จ: " + e.getMessage(), 0, false);
+            }
+        });
     }
 
     private void chooseFile(ImportType type) {
