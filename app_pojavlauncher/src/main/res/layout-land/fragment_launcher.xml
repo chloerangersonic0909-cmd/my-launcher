@@ -28,13 +28,75 @@
                 android:layout_height="0dp"
                 android:orientation="vertical"
                 app:layout_constraintGuide_percent="0.5"/>
+            <TextView
+                android:id="@+id/mylauncher_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:text="MY LAUNCHER  /  CONTROL CENTER"
+                android:textColor="#8CCBFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/background_status_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:text="@string/mylauncher_game_not_running"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mylauncher_header" />
+
+            <LinearLayout
+                android:id="@+id/background_actions"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/background_status_text">
+
+                <Button
+                    android:id="@+id/background_permission_button"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#173B59"
+                    android:text="@string/mylauncher_enable_notifications"
+                    android:textColor="@android:color/white"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/stop_game_button"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#7A2637"
+                    android:enabled="false"
+                    android:text="@string/mylauncher_stop_game"
+                    android:textColor="@android:color/white"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/news_button"
                 style="@style/LauncherMenuButton.Universal"
                 android:layout_width="0dp"
                 android:drawableStart="@drawable/ic_menu_news"
                 android:text="@string/mcl_tab_wiki"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/background_actions"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/social_divider"/>
             <View
