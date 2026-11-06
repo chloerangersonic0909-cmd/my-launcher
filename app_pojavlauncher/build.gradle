@@ -61,6 +61,7 @@ android {
         versionCode 10000001
         versionName getVersionName()
         resValue 'string', 'app_version', getVersionName()
+        resValue 'string', 'app_version_label', "My Launcher • v${getVersionName()}"
         multiDexEnabled true //important
         resValue 'string', 'curseforge_api_key', getCFApiKey()
         externalNativeBuild {
