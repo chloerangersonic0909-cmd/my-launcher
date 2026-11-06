@@ -374,7 +374,17 @@ public class mcAccountSpinner extends AppCompatSpinner implements AdapterView.On
 
             ExtendedTextView textview = convertView.findViewById(R.id.account_item);
             ImageView deleteButton = convertView.findViewById(R.id.delete_account_button);
-            textview.setText(super.getItem(position));
+            String accountName = super.getItem(position);
+            if (position == 0) {
+                textview.setText(accountName);
+            } else {
+                MinecraftAccount account = MinecraftAccount.load(accountName);
+                boolean verified = account != null && account.isMicrosoft
+                        && account.accessToken != null && !account.accessToken.equals("0");
+                textview.setText(verified
+                        ? accountName + "  ✓ ยืนยันแล้ว"
+                        : accountName + "  • ไม่ยืนยันตัวตน");
+            }
 
             // Handle the "Add account section"
             if(position == 0) {
