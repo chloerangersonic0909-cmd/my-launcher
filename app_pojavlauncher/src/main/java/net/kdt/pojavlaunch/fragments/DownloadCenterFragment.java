@@ -49,6 +49,7 @@ import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.jar.JarFile;
 
 public class DownloadCenterFragment extends Fragment {
     public static final String TAG = "DownloadCenterFragment";
@@ -63,6 +64,7 @@ public class DownloadCenterFragment extends Fragment {
     private CommonApi modpackApi;
     private Future<?> activeTask;
     private volatile boolean importing;
+    private volatile Thread importThread;
     private Context appContext;
 
     private final ActivityResultLauncher<String[]> filePicker =
@@ -310,11 +312,13 @@ public class DownloadCenterFragment extends Fragment {
         importing = true;
         setStatus("กำลังเตรียมไฟล์: " + displayName, 0, true);
         activeTask = PojavApplication.sExecutorService.submit(() -> {
+            importThread = Thread.currentThread();
             try {
                 File gameDir = Tools.getGameDirPath(LauncherProfiles.getCurrentProfile());
                 File result;
                 switch (type) {
                     case MOD:
+                        validateModJar(uri);
                         result = copyInto(uri, displayName, new File(gameDir, "mods"), 512L * 1024L * 1024L);
                         break;
                     case SHADER:
@@ -339,6 +343,7 @@ public class DownloadCenterFragment extends Fragment {
                 postStatus("นำเข้าไม่สำเร็จ: " + e.getMessage(), 0, false);
             } finally {
                 importing = false;
+                importThread = null;
                 activeTask = null;
                 postCancelEnabled(false);
             }
@@ -376,6 +381,18 @@ public class DownloadCenterFragment extends Fragment {
             throw new IOException("ย้ายไฟล์ไปยังโฟลเดอร์เกมไม่สำเร็จ");
         }
         return destination;
+    }
+
+    private void validateModJar(Uri uri) throws IOException {
+        File temp = copyToCache(uri, "check_mod_" + UUID.randomUUID() + ".jar", 512L * 1024L * 1024L);
+        try (JarFile jar = new JarFile(temp)) {
+            if (!jar.entries().hasMoreElements()) throw new IOException("ไฟล์ JAR ว่างเปล่า");
+        } catch (java.util.zip.ZipException e) {
+            throw new IOException("ไฟล์นี้ไม่ใช่ JAR ที่สมบูรณ์", e);
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            temp.delete();
+        }
     }
 
     private void validateResourcePack(Uri uri) throws IOException {
