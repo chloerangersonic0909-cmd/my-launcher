@@ -1,5 +1,6 @@
 package net.kdt.pojavlaunch.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.database.Cursor;
@@ -434,9 +435,9 @@ public class DownloadCenterFragment extends Fragment {
         if (!tempDir.mkdirs()) throw new IOException("สร้างโฟลเดอร์ชั่วคราวไม่ได้");
         long expanded = 0;
         int entriesCount = 0;
-        try (InputStream raw = requireContext().getContentResolver().openInputStream(uri);
-             ZipInputStream zip = new ZipInputStream(raw)) {
-            if (raw == null) throw new IOException("อ่าน ZIP ไม่ได้");
+        InputStream source = appContext.getContentResolver().openInputStream(uri);
+        if (source == null) throw new IOException("อ่าน ZIP ไม่ได้");
+        try (InputStream raw = source; ZipInputStream zip = new ZipInputStream(raw)) {
             ZipEntry entry;
             byte[] buffer = new byte[32 * 1024];
             while ((entry = zip.getNextEntry()) != null) {
@@ -552,13 +553,15 @@ public class DownloadCenterFragment extends Fragment {
     }
 
     private void postStatus(String text, int progress, boolean busy) {
-        if (!isAdded()) return;
-        requireActivity().runOnUiThread(() -> setStatus(text, progress, busy));
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.runOnUiThread(() -> setStatus(text, progress, busy));
     }
 
     private void postCancelEnabled(boolean enabled) {
-        if (!isAdded()) return;
-        requireActivity().runOnUiThread(() -> {
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.runOnUiThread(() -> {
             if (cancelButton != null) cancelButton.setEnabled(enabled);
         });
     }
