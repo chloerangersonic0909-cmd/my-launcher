@@ -19,6 +19,7 @@ public final class GamePerformanceManager {
     private final Activity activity;
     private final PowerManager powerManager;
     private GameApiBridge gameApiBridge;
+    private GameStateApiBridge gameStateApiBridge;
     private ThermalApiBridge thermalApiBridge;
     private boolean severeThermalWarningShown;
 
@@ -33,6 +34,10 @@ public final class GamePerformanceManager {
             if (gameApiBridge == null) gameApiBridge = new GameApiBridge(activity);
             gameApiBridge.onResume();
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (gameStateApiBridge == null) gameStateApiBridge = new GameStateApiBridge(activity);
+            gameStateApiBridge.setGameplayActive(true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && powerManager != null) {
             if (thermalApiBridge == null) {
@@ -44,7 +49,7 @@ public final class GamePerformanceManager {
 
     /** Mark gameplay as inactive when the Minecraft Activity leaves the foreground. */
     public void onPause() {
-        if (gameApiBridge != null) gameApiBridge.onPause();
+        if (gameStateApiBridge != null) gameStateApiBridge.setGameplayActive(false);
         if (thermalApiBridge != null) thermalApiBridge.stop();
     }
 
@@ -116,14 +121,33 @@ public final class GamePerformanceManager {
         }
     }
 
-    /** Android 12+ Game Mode and Android 13+ Game State API bridge. */
+    /** Android 13+ Game State API bridge, isolated from Android 12 class loading. */
+    private static final class GameStateApiBridge {
+        private final android.app.GameManager gameManager;
+
+        GameStateApiBridge(Activity activity) {
+            gameManager = activity.getSystemService(android.app.GameManager.class);
+        }
+
+        void setGameplayActive(boolean active) {
+            if (gameManager == null) return;
+            int mode = active
+                    ? android.app.GameState.MODE_GAMEPLAY_INTERRUPTIBLE
+                    : android.app.GameState.MODE_NONE;
+            try {
+                gameManager.setGameState(new android.app.GameState(false, mode));
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Unable to report gameplay state to Android", e);
+            }
+        }
+    }
+
+    /** Android 12+ Game Mode API bridge. */
     private static final class GameApiBridge {
         private final android.app.GameManager gameManager;
-        private final boolean hasGameStateApi;
 
         GameApiBridge(Activity activity) {
             gameManager = activity.getSystemService(android.app.GameManager.class);
-            hasGameStateApi = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
         }
 
         void onResume() {
@@ -135,20 +159,6 @@ public final class GamePerformanceManager {
                 Log.w(TAG, "Unable to read Android Game Mode", e);
             }
 
-            if (hasGameStateApi) reportState(android.app.GameState.MODE_GAMEPLAY_INTERRUPTIBLE);
-        }
-
-        void onPause() {
-            if (hasGameStateApi) reportState(android.app.GameState.MODE_NONE);
-        }
-
-        private void reportState(int mode) {
-            if (gameManager == null) return;
-            try {
-                gameManager.setGameState(new android.app.GameState(false, mode));
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Unable to report gameplay state to Android", e);
-            }
         }
 
         private static String gameModeName(int mode) {
