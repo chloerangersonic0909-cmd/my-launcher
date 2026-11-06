@@ -86,13 +86,15 @@ public class MicrosoftBackgroundLogin {
                 checkMcProfile(mcToken);
                 fetchOwnedItems(mcToken);
 
-                if (!hasProfile && doesOwnGame) {
+                if (!doesOwnGame) {
+                    // A Microsoft/Xbox account alone does not prove Minecraft Java Edition ownership.
+                    // Bedrock-only entitlements must never be accepted by this Java launcher.
+                    throw new PresentedException(R.string.minecraft_not_owned);
+                } else if (!hasProfile) {
                     throw new PresentedException(R.string.minecraft_no_username_set);
-                } else if (!doesOwnGame) {
-                    mcName = "Demo.Player";
-                    mcUuid = "00000000-0000-0000-0000-000000000000";
-                } else if (mcName == null || mcUuid == null)
+                } else if (mcName == null || mcUuid == null) {
                     throw new IllegalStateException("This should never happen, please report this as a bug");
+                }
 
                 MinecraftAccount acc = MinecraftAccount.load(mcName);
                 if(acc == null) acc = new MinecraftAccount();
@@ -299,11 +301,10 @@ public class MicrosoftBackgroundLogin {
             JSONArray entitlements = jsonSignature.getJSONArray("entitlements");
             for (int i = 0; i < entitlements.length(); ++i) {
                 switch (entitlements.getString(i)) {
-                    // These four are guaranteed to always be present because Java & Bedrock are 1 pack
+                    // Only Java Edition entitlements count for this launcher.
+                    // Bedrock ownership is intentionally excluded.
                     case "product_minecraft":
                     case "game_minecraft":
-                    case "product_minecraft_bedrock":
-                    case "game_minecraft_bedrock":
                         doesOwnGame = true;
                         break;
                     case "product_game_pass_pc":
