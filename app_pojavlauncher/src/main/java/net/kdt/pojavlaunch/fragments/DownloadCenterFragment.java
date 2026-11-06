@@ -238,7 +238,7 @@ public class DownloadCenterFragment extends Fragment {
                 postStatus("กำลังคัดลอก " + name + " (" + humanSize(copied) + ")", progress, true);
             }
             output.flush();
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             //noinspection ResultOfMethodCallIgnored
             temporary.delete();
             throw e;
@@ -282,7 +282,7 @@ public class DownloadCenterFragment extends Fragment {
 
     private File copyToCache(Uri uri, String name, long maxBytes) throws IOException {
         File target = new File(Tools.DIR_CACHE, name);
-        try (InputStream input = requireContext().getContentResolver().openInputStream(uri);
+        try (InputStream input = appContext.getContentResolver().openInputStream(uri);
              FileOutputStream output = new FileOutputStream(target)) {
             if (input == null) throw new IOException("อ่านไฟล์ต้นทางไม่ได้");
             byte[] buffer = new byte[64 * 1024];
@@ -294,7 +294,7 @@ public class DownloadCenterFragment extends Fragment {
                 if (total > maxBytes) throw new IOException("ไฟล์มีขนาดเกินขีดจำกัด");
                 output.write(buffer, 0, read);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             //noinspection ResultOfMethodCallIgnored
             target.delete();
             throw e;
@@ -339,7 +339,7 @@ public class DownloadCenterFragment extends Fragment {
                 }
                 zip.closeEntry();
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             deleteRecursively(tempDir);
             throw e;
         }
