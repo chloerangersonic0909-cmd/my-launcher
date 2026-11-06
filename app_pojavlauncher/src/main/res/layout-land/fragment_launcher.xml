@@ -125,7 +125,15 @@
                 android:text="@string/mcl_option_customcontrol"
                 app:layout_constraintTop_toBottomOf="@id/news_button"/>
 
-            <com.kdt.mcgui.LauncherMenuButton
+                        <com.kdt.mcgui.LauncherMenuButton
+                android:id="@+id/download_center_button"
+                style="@style/LauncherMenuButton.Universal"
+                android:layout_width="match_parent"
+                android:drawableStart="@drawable/ic_folder"
+                android:text="📦 Download Center"
+                app:layout_constraintTop_toBottomOf="@id/download_center_button" />
+
+<com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/install_jar_button"
                 style="@style/LauncherMenuButton.Universal"
                 android:layout_width="match_parent"
