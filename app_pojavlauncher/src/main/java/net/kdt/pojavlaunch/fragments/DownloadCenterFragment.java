@@ -356,6 +356,7 @@ public class DownloadCenterFragment extends Fragment {
         File destination = uniqueFile(directory, safeName);
         File temporary = new File(directory, destination.getName() + ".part");
         long copied = 0;
+        long expectedSize = queryFileSize(uri);
         try (InputStream input = appContext.getContentResolver().openInputStream(uri);
              FileOutputStream output = new FileOutputStream(temporary)) {
             if (input == null) throw new IOException("อ่านไฟล์ต้นทางไม่ได้");
@@ -366,7 +367,7 @@ public class DownloadCenterFragment extends Fragment {
                 copied += read;
                 if (copied > maxBytes) throw new IOException("ไฟล์มีขนาดเกินขีดจำกัด");
                 output.write(buffer, 0, read);
-                int progress = estimateProgress(uri, copied);
+                int progress = expectedSize > 0 ? (int) Math.min(99, copied * 100 / expectedSize) : 0;
                 postStatus("กำลังคัดลอก " + name + " (" + humanSize(copied) + ")", progress, true);
             }
             output.flush();
@@ -548,14 +549,11 @@ public class DownloadCenterFragment extends Fragment {
         return safe.length() > 120 ? safe.substring(0, 120) : safe;
     }
 
-    private int estimateProgress(Uri uri, long copied) {
-        try (Cursor cursor = requireContext().getContentResolver().query(uri, new String[]{OpenableColumns.SIZE}, null, null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                long size = cursor.getLong(0);
-                if (size > 0) return (int) Math.min(99, copied * 100 / size);
-            }
+    private long queryFileSize(Uri uri) {
+        try (Cursor cursor = appContext.getContentResolver().query(uri, new String[]{OpenableColumns.SIZE}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) return cursor.getLong(0);
         } catch (Exception ignored) {}
-        return 0;
+        return -1;
     }
 
     private String humanSize(long bytes) {
