@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mylauncher_enable_notifications">Enable background notifications</string>
+    <string name="mylauncher_stop_game">Stop Minecraft</string>
+    <string name="mylauncher_game_running_background">Minecraft is running in the background.</string>
+    <string name="mylauncher_game_not_running">Minecraft is not running.</string>
+    <string name="mylauncher_notification_permission_granted">Notification permission is enabled.</string>
+    <string name="mylauncher_notification_permission_denied">Notification permission was not granted. Android may limit visible notifications.</string>
+    <string name="mylauncher_notification_permission_not_required">Android does not require notification permission on this version.</string>
+    <string name="mylauncher_stop_game_title">Stop Minecraft?</string>
+    <string name="mylauncher_stop_game_warning">This will close the Minecraft game process immediately. Save your world first; unsaved progress may be lost.</string>
+    <string name="mylauncher_stop_game_sent">Stop command sent to the Minecraft process.</string>
+</resources>
