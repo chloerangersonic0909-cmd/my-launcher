@@ -13,6 +13,8 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -73,6 +75,10 @@ public class MainMenuFragment extends Fragment {
         Button mCustomControlButton = view.findViewById(R.id.custom_control_button);
         Button mInstallJarButton = view.findViewById(R.id.install_jar_button);
         Button downloadCenterButton = view.findViewById(R.id.download_center_button);
+        Button securityCenterButton = view.findViewById(R.id.security_center_button);
+        if (securityCenterButton != null) {
+            securityCenterButton.setOnClickListener(v -> showSecurityCenter());
+        }
         if (downloadCenterButton != null) {
             downloadCenterButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(), DownloadCenterFragment.class, DownloadCenterFragment.TAG, null));
         }
@@ -136,6 +142,75 @@ public class MainMenuFragment extends Fragment {
             Tools.swapFragment(requireActivity(), GamepadMapperFragment.class, GamepadMapperFragment.TAG, null);
             return true;
         });
+    }
+
+
+    /**
+     * Performs a local, best-effort security review of this installed launcher.
+     * This is a configuration check, not an antivirus or malware scan.
+     */
+    private void showSecurityCenter() {
+        if (!isAdded()) return;
+        StringBuilder report = new StringBuilder();
+        int warnings = 0;
+        try {
+            String packageName = requireContext().getPackageName();
+            PackageManager pm = requireContext().getPackageManager();
+            ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+            PackageInfo packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+
+            report.append("🛡️ MY LAUNCHER SECURITY CENTER\\n");
+            report.append("เวอร์ชัน: ").append(packageInfo.versionName == null ? "ไม่ทราบ" : packageInfo.versionName).append("\\n");
+            report.append("แพ็กเกจ: ").append(packageName).append("\\n\\n");
+
+            boolean debuggable = (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            report.append(debuggable ? "⚠️ " : "✅ ")
+                    .append("โหมด Debug: ").append(debuggable ? "เปิดอยู่ (เหมาะกับทดสอบเท่านั้น)" : "ปิดอยู่").append("\\n");
+            if (debuggable) warnings++;
+
+            boolean backupAllowed = (appInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
+            report.append(backupAllowed ? "ℹ️ " : "✅ ")
+                    .append("การสำรองข้อมูลแอป: ").append(backupAllowed ? "อนุญาตโดยการตั้งค่าแอป" : "ปิดอยู่").append("\\n");
+            if (backupAllowed) warnings++;
+
+            String installer = null;
+            try {
+                installer = pm.getInstallerPackageName(packageName);
+            } catch (Exception ignored) {
+                // Installer attribution is optional and may be unavailable.
+            }
+            report.append(installer == null ? "ℹ️ " : "✅ ")
+                    .append("แหล่งติดตั้ง: ").append(installer == null ? "Android ไม่ระบุแหล่งติดตั้ง" : installer).append("\\n");
+            if (installer == null) warnings++;
+
+            report.append("\\nสิทธิ์ที่แอปร้องขอ:\\n");
+            String[] permissions = packageInfo.requestedPermissions;
+            if (permissions == null || permissions.length == 0) {
+                report.append("ไม่มีรายการสิทธิ์ที่ร้องขอ\\n");
+            } else {
+                for (String permission : permissions) {
+                    String shortName = permission.substring(permission.lastIndexOf('.') + 1);
+                    boolean granted = pm.checkPermission(permission, packageName) == PackageManager.PERMISSION_GRANTED;
+                    report.append(granted ? "• " : "• ")
+                            .append(shortName)
+                            .append(granted ? " — อนุญาตแล้ว" : " — ยังไม่ได้อนุญาต")
+                            .append("\\n");
+                }
+            }
+
+            report.append("\\nผลตรวจเบื้องต้น: ")
+                    .append(warnings == 0 ? "ไม่พบการตั้งค่าที่ควรแจ้งเตือน" : "พบ ").append(warnings)
+                    .append(" รายการที่ควรตรวจสอบ");
+            report.append("\\n\\nหมายเหตุ: นี่เป็นการตรวจการตั้งค่าพื้นฐานของแอป ไม่ใช่การสแกนไวรัส และไม่สามารถรับรองความปลอดภัย 100% ได้.");
+        } catch (Exception e) {
+            report.append("ไม่สามารถตรวจสอบข้อมูลแอปได้: ").append(e.getClass().getSimpleName());
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("🛡️ Security Center")
+                .setMessage(report.toString())
+                .setPositiveButton("ปิด", null)
+                .show();
     }
 
     private File getCurrentProfileDirectory() {
