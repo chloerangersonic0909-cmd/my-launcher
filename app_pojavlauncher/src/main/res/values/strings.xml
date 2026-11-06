@@ -154,6 +154,9 @@
     <string name="customctrl_addsubbutton">Add sub-button</string>
 
     <string name="customctrl_selectdefault">Select default controlmap</string>
+    <string name="customctrl_restore_default">Restore built-in defaults</string>
+    <string name="customctrl_restore_default_confirm">This replaces the current default control layout with the original bundled layout. Saved custom layouts will not be deleted. Continue?</string>
+    <string name="customctrl_restore_default_done">Default controls restored</string>
     <string name="customctrl_export">Export controlmap</string>
 
     <string name="main_share_logs">Share log file</string>
