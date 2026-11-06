@@ -53,6 +53,7 @@ public class DownloadCenterFragment extends Fragment {
     private Button cancelButton;
     private Future<?> activeTask;
     private volatile boolean importing;
+    private Context appContext;
 
     private final ActivityResultLauncher<String[]> filePicker =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::onFileSelected);
@@ -62,6 +63,7 @@ public class DownloadCenterFragment extends Fragment {
     public View onCreateView(@NonNull android.view.LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = requireContext();
+        appContext = context.getApplicationContext();
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(Color.rgb(8, 12, 23));
@@ -222,7 +224,7 @@ public class DownloadCenterFragment extends Fragment {
         File destination = uniqueFile(directory, safeName);
         File temporary = new File(directory, destination.getName() + ".part");
         long copied = 0;
-        try (InputStream input = requireContext().getContentResolver().openInputStream(uri);
+        try (InputStream input = appContext.getContentResolver().openInputStream(uri);
              FileOutputStream output = new FileOutputStream(temporary)) {
             if (input == null) throw new IOException("อ่านไฟล์ต้นทางไม่ได้");
             byte[] buffer = new byte[64 * 1024];
