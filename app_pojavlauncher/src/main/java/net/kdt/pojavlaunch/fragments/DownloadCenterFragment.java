@@ -520,7 +520,7 @@ public class DownloadCenterFragment extends Fragment {
 
     private String queryDisplayName(Uri uri) {
         String name = "imported_file";
-        try (Cursor cursor = requireContext().getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+        try (Cursor cursor = appContext.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                 if (index >= 0) name = cursor.getString(index);
