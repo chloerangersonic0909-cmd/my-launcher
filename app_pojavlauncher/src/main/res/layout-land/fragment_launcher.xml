@@ -274,7 +274,7 @@
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
             android:background="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/mcl_edit_profile"
+            android:contentDescription="Edit profile"
             android:src="@drawable/ic_edit_profile" />
 
         <com.kdt.mcgui.MineButton
