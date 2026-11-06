@@ -139,12 +139,12 @@ public class DownloadCenterFragment extends Fragment {
         root.addView(modpackResults, resultsParams);
 
         addSection(root, "MOD CONTENT");
-        addCard(root, "🧩  Mods (.jar)", "นำไฟล์ Mod JAR ไปไว้ในโฟลเดอร์ mods", () -> chooseFile(ImportType.MOD));
-        addCard(root, "✨  Shaders (.zip)", "นำ Shader Pack ไปไว้ในโฟลเดอร์ shaderpacks", () -> chooseFile(ImportType.SHADER));
-        addCard(root, "🎨  Resource Packs (.zip)", "ตรวจ pack.mcmeta ก่อนติดตั้ง", () -> chooseFile(ImportType.RESOURCE_PACK));
+        addCard(root, "🧩  Mods (.jar)", "นำไฟล์ Mod JAR ไปไว้ในโฟลเดอร์ mods", v -> chooseFile(ImportType.MOD));
+        addCard(root, "✨  Shaders (.zip)", "นำ Shader Pack ไปไว้ในโฟลเดอร์ shaderpacks", v -> chooseFile(ImportType.SHADER));
+        addCard(root, "🎨  Resource Packs (.zip)", "ตรวจ pack.mcmeta ก่อนติดตั้ง", v -> chooseFile(ImportType.RESOURCE_PACK));
         addSection(root, "GAME CONTENT");
-        addCard(root, "🌍  Worlds (.zip)", "แตกไฟล์อย่างปลอดภัยและตรวจหา level.dat", () -> chooseFile(ImportType.WORLD));
-        addCard(root, "📦  Modpacks (.mrpack / .zip)", "ใช้ตัวติดตั้ง Modpack เดิมของ Amethyst", () -> {
+        addCard(root, "🌍  Worlds (.zip)", "แตกไฟล์อย่างปลอดภัยและตรวจหา level.dat", v -> chooseFile(ImportType.WORLD));
+        addCard(root, "📦  Modpacks (.mrpack / .zip)", "ใช้ตัวติดตั้ง Modpack เดิมของ Amethyst", v -> {
             if (getActivity() instanceof LauncherActivity) {
                 ((LauncherActivity) requireActivity()).modpackImportLauncher.launch(null);
             }
