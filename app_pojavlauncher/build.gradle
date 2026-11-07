@@ -6,7 +6,7 @@ static def getDate() { return new Date().format('yyyyMMdd') }
 
 def getVersionName = {
     // My Launcher public version. Update this value for each app release.
-    return "0.0.0.1"
+    return "0.0.0.2"
 }
 
 def getCFApiKey = {
@@ -58,7 +58,7 @@ android {
         applicationId "org.angelauramc.amethyst"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 10000001
+        versionCode 10000002
         versionName getVersionName()
         resValue 'string', 'app_version', getVersionName()
         resValue 'string', 'app_version_label', "My Launcher • v${getVersionName()}"
