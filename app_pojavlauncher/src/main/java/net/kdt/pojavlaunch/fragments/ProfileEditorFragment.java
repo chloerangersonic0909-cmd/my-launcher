@@ -48,6 +48,7 @@ import java.util.List;
 
 public class ProfileEditorFragment extends Fragment implements CropperUtils.CropperListener{
     public static final String TAG = "ProfileEditorFragment";
+    public static final String ARG_PRESELECT_VERSION = "mylauncher_preselect_version";
     public static final String DELETED_PROFILE = "deleted_profile";
 
     private String mProfileKey;
@@ -131,6 +132,12 @@ public class ProfileEditorFragment extends Fragment implements CropperUtils.Crop
         mProfileIcon.setOnClickListener(v -> CropperUtils.startCropper(mCropperLauncher));
 
         loadValues(LauncherPreferences.DEFAULT_PREF.getString(LauncherPreferences.PREF_KEY_CURRENT_PROFILE, ""), view.getContext());
+        String preselectedVersion = getArguments() == null ? null
+                : getArguments().getString(ARG_PRESELECT_VERSION);
+        if (preselectedVersion != null && !preselectedVersion.isEmpty()) {
+            mTempProfile.lastVersionId = preselectedVersion;
+            mDefaultVersion.setText(preselectedVersion);
+        }
     }
 
     private View.OnClickListener getGameDirListener() {
