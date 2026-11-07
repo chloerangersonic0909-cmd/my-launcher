@@ -538,4 +538,6 @@
     <string name="mylauncher_quick_access_desc">Manage versions, mods, shaders, resource packs and worlds in Download Center.</string>
     <string name="mylauncher_add_account">Add Account</string>
     <string name="mylauncher_no_installed_versions_hint">No installed versions</string>
+    <string name="mylauncher_install_version">＋ Install Minecraft version</string>
+    <string name="mylauncher_install_version_desc">Browse and install game versions</string>
 </resources>
