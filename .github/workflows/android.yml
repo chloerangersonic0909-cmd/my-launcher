@@ -11,6 +11,8 @@ on:
   push:
     branches-ignore:
       - 'l10n_v3_openjdk'
+    paths-ignore:
+      - '.github/download-monitor-state.json'
   workflow_dispatch:
     inputs:
       test_webhook:
