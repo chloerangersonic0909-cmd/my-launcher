@@ -10,6 +10,21 @@
     <net.kdt.pojavlaunch.prefs.BackButtonPreference/>
 
     <PreferenceCategory
+        android:title="Appearance / รูปลักษณ์"
+        >
+        <Preference
+            android:key="background_image_pick"
+            android:title="เปลี่ยนภาพพื้นหลัง"
+            android:summary="เลือกรูปภาพจากอุปกรณ์ของคุณ"
+            android:icon="@android:drawable/ic_menu_gallery" />
+        <Preference
+            android:key="background_image_reset"
+            android:title="คืนค่าพื้นหลังเริ่มต้น"
+            android:summary="ลบภาพพื้นหลังที่เลือกไว้"
+            android:icon="@android:drawable/ic_menu_revert" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/preference_category_main_categories"
         >
 
