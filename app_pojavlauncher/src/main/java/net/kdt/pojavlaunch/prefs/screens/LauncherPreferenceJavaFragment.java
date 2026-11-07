@@ -51,8 +51,36 @@ public class LauncherPreferenceJavaFragment extends LauncherPreferenceFragment {
         else maxRAM = deviceRam - (deviceRam < 3064 ? 800 : 1024); //To have a minimum for the device to breathe
 
         memorySeekbar.setMaxKeepIncrement(maxRAM);
-        memorySeekbar.setValue(ramAllocation);
         memorySeekbar.setSuffix(" MB");
+
+        SwitchPreference autoRamPreference = findPreference("auto_ram_allocation");
+        boolean autoRamEnabled = LauncherPreferences.PREF_AUTO_RAM_ALLOCATION;
+        if (autoRamPreference != null) {
+            autoRamPreference.setChecked(autoRamEnabled);
+            if (autoRamEnabled) {
+                ramAllocation = Math.min(maxRAM,
+                        LauncherPreferences.getRecommendedRAMAllocation(memorySeekbar.getContext()));
+            }
+            memorySeekbar.setEnabled(!autoRamEnabled);
+            memorySeekbar.setSummary(autoRamEnabled
+                    ? getString(R.string.mylauncher_auto_ram_active, ramAllocation)
+                    : getString(R.string.mcl_memory_allocation_subtitle));
+            autoRamPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean enabled = (Boolean) newValue;
+                LauncherPreferences.PREF_AUTO_RAM_ALLOCATION = enabled;
+                if (enabled) {
+                    int recommended = Math.min(maxRAM,
+                            LauncherPreferences.getRecommendedRAMAllocation(memorySeekbar.getContext()));
+                    memorySeekbar.setValue(recommended);
+                    memorySeekbar.setSummary(getString(R.string.mylauncher_auto_ram_active, recommended));
+                } else {
+                    memorySeekbar.setSummary(getString(R.string.mcl_memory_allocation_subtitle));
+                }
+                memorySeekbar.setEnabled(!enabled);
+                return true;
+            });
+        }
+        memorySeekbar.setValue(ramAllocation);
 
         EditTextPreference editJVMArgs = findPreference("javaArgs");
         if (editJVMArgs != null) {
