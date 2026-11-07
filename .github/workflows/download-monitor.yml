@@ -62,7 +62,7 @@ jobs:
                   previous = None
 
           state_path.parent.mkdir(parents=True, exist_ok=True)
-          state_path.write_text(json.dumps({"total_downloads": total}, indent=2) + "\\n")
+          state_path.write_text(json.dumps({"total_downloads": total}, indent=2) + "\n")
 
           if previous is None:
               print(f"Initialized download baseline at {total}. No notification sent.")
