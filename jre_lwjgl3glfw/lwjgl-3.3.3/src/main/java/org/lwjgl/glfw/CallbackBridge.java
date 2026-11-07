@@ -24,7 +24,6 @@ public class CallbackBridge {
     // Notification actions
     public static final int INIT = 0;
     public static final int SET_CURSOR = 4;
-    public static final int SET_CURSOR = 4;
 
     public static boolean sGamepadDirectEnabled;
     
