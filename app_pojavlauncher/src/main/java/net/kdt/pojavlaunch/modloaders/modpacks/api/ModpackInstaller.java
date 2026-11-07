@@ -94,9 +94,14 @@ public class ModpackInstaller {
             default:
                 throw new UnsupportedOperationException("Unknown API source: " + apiSource);
         }
-        // Read Manifest JSON
-        JsonObject manifestFile = JsonParser.parseString(Tools.read(ZipUtils.getEntryStream(
-                    new ZipFile(modpackFile), manifestFileName))).getAsJsonObject();
+        // Read and close the archive before continuing with validation.
+        JsonObject manifestFile;
+        try (ZipFile archive = new ZipFile(modpackFile);
+             java.io.InputStream manifestStream = ZipUtils.getEntryStream(archive, manifestFileName)) {
+            manifestFile = JsonParser.parseString(Tools.read(manifestStream)).getAsJsonObject();
+        } catch (RuntimeException error) {
+            throw new IOException("Modpack manifest is invalid or corrupted", error);
+        }
 
         // Parse the JSON to prepare for instance creation
         ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, 1, R.string.import_modpack_json);
@@ -127,20 +132,20 @@ public class ModpackInstaller {
         // Hash the ZIP File, can't use getSha1 cause progress bar
         MessageDigest algorithm = MessageDigest.getInstance("SHA-1");
         //noinspection IOStreamConstructor It will reccomend you use an API26 function like a dumb
-        DigestInputStream hashingStream = new DigestInputStream(new FileInputStream(modpackFile), algorithm);
         long fileSize = modpackFile.length();
         long readSize = 0;
         byte[] buffer = new byte[262144];
-        while (true) {
-            int n = hashingStream.read(buffer);
-            if (n == -1) break;
-            readSize += n;
-            String readMB = fileSize > 0 ? String.format(Locale.US, "%.2f", readSize / (1024.0 * 1024.0)) : "unknown";
-            String totalMB = fileSize > 0 ? String.format(Locale.US, "%.2f",fileSize / (1024.0 * 1024.0)) : "unknown";
-            int progress = fileSize > 0 ? (int) ((readSize * 100L) / fileSize) : 0;
-            ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, progress, R.string.import_modpack_hash, readMB, totalMB);
+        try (DigestInputStream hashingStream = new DigestInputStream(new FileInputStream(modpackFile), algorithm)) {
+            while (true) {
+                int n = hashingStream.read(buffer);
+                if (n == -1) break;
+                readSize += n;
+                String readMB = fileSize > 0 ? String.format(Locale.US, "%.2f", readSize / (1024.0 * 1024.0)) : "unknown";
+                String totalMB = fileSize > 0 ? String.format(Locale.US, "%.2f",fileSize / (1024.0 * 1024.0)) : "unknown";
+                int progress = fileSize > 0 ? (int) ((readSize * 100L) / fileSize) : 0;
+                ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, progress, R.string.import_modpack_hash, readMB, totalMB);
+            }
         }
-        hashingStream.close();
         byte[] digest = algorithm.digest();
         StringBuilder sb = new StringBuilder(digest.length * 2);
         for (byte b : digest) {
