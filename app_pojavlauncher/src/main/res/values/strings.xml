@@ -521,4 +521,19 @@
     <string name="angelica_found_sfpew_notice">Angelica mod found, Simple FPE Wrapper not needed</string>
     <string name="use_angle_checkbox">Use ANGLE (might help FPS)</string>
 
+    <!-- My Launcher professional home UI -->
+    <string name="mylauncher_brand">MY LAUNCHER</string>
+    <string name="mylauncher_subtitle">MINECRAFT JAVA WORKSPACE</string>
+    <string name="mylauncher_system_ready">● SYSTEM READY</string>
+    <string name="mylauncher_next_world">YOUR NEXT WORLD</string>
+    <string name="mylauncher_ready_play">Ready to play?</string>
+    <string name="mylauncher_choose_version">Choose a Minecraft version and start playing.</string>
+    <string name="mylauncher_quick_access">QUICK ACCESS</string>
+    <string name="mylauncher_download_center">Download Center</string>
+    <string name="mylauncher_security_center">Security Center</string>
+    <string name="mylauncher_edit_profile">Edit profile</string>
+    <string name="mylauncher_library">LIBRARY</string>
+    <string name="mylauncher_platform">Minecraft • Android</string>
+    <string name="mylauncher_system_status">SYSTEM STATUS</string>
+    <string name="mylauncher_quick_access_desc">Manage versions, mods, shaders, resource packs and worlds in Download Center.</string>
 </resources>
