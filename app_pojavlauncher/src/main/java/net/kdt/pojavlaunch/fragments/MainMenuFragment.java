@@ -91,7 +91,7 @@ public class MainMenuFragment extends Fragment {
         }
         if (installVersionButton != null) {
             installVersionButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(),
-                    DownloadCenterFragment.class, DownloadCenterFragment.TAG, null));
+                    VersionInstallerFragment.class, VersionInstallerFragment.TAG, null));
         }
         Button mShareLogsButton = view.findViewById(R.id.share_logs_button);
         Button mOpenDirectoryButton = view.findViewById(R.id.open_files_button);
