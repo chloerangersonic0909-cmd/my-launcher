@@ -8,7 +8,9 @@ import static net.kdt.pojavlaunch.Tools.isOnline;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
@@ -53,6 +55,7 @@ import net.kdt.pojavlaunch.prefs.screens.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.progresskeeper.TaskCountListener;
 import net.kdt.pojavlaunch.services.ProgressServiceKeeper;
+import net.kdt.pojavlaunch.tasks.AsyncAssetManager;
 import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
 import net.kdt.pojavlaunch.tasks.AsyncVersionList;
 import net.kdt.pojavlaunch.tasks.MinecraftDownloader;
@@ -286,10 +289,66 @@ public class LauncherActivity extends BaseActivity {
         return false;
     }
 
+    private void runFirstLaunchSetupIfNeeded() {
+        SharedPreferences setupPrefs = getSharedPreferences("mylauncher_first_run", MODE_PRIVATE);
+        if (setupPrefs.getBoolean("components_ready", false)) return;
+
+        ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("My Launcher — เตรียมความพร้อม");
+        progress.setMessage("กำลังตรวจสอบและติดตั้งส่วนเสริมที่จำเป็น...");
+        progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progress.setIndeterminate(false);
+        progress.setMax(100);
+        progress.setProgress(0);
+        progress.setCancelable(false);
+        progress.show();
+
+        AsyncAssetManager.prepareFirstRun(this, new AsyncAssetManager.FirstRunSetupListener() {
+            @Override
+            public void onStep(String message, int value) {
+                runOnUiThread(() -> {
+                    if (!isFinishing() && progress.isShowing()) {
+                        progress.setMessage(message);
+                        progress.setProgress(value);
+                    }
+                });
+            }
+
+            @Override
+            public void onComplete(IOException error) {
+                runOnUiThread(() -> {
+                    if (isFinishing()) return;
+                    if (progress.isShowing()) progress.dismiss();
+                    if (error == null) {
+                        setupPrefs.edit().putBoolean("components_ready", true).apply();
+                        new AlertDialog.Builder(LauncherActivity.this)
+                                .setTitle("ติดตั้งส่วนเสริมเรียบร้อย")
+                                .setMessage("ระบบพร้อมแล้ว ขั้นตอนต่อไปคือเข้าสู่ระบบ Microsoft เพื่อใช้ Minecraft Java Edition")
+                                .setCancelable(false)
+                                .setPositiveButton("ดำเนินการต่อ", (dialog, which) ->
+                                        Tools.swapFragment(LauncherActivity.this,
+                                                MicrosoftLoginFragment.class,
+                                                MicrosoftLoginFragment.TAG, null))
+                                .show();
+                    } else {
+                        new AlertDialog.Builder(LauncherActivity.this)
+                                .setTitle("ติดตั้งส่วนเสริมไม่สำเร็จ")
+                                .setMessage("ไม่สามารถเตรียมไฟล์ที่จำเป็นได้ กรุณาตรวจสอบพื้นที่ว่างและลองอีกครั้ง\n\n" + error.getMessage())
+                                .setCancelable(false)
+                                .setPositiveButton("ลองอีกครั้ง", (dialog, which) -> runFirstLaunchSetupIfNeeded())
+                                .setNegativeButton("ปิดแอป", (dialog, which) -> finish())
+                                .show();
+                    }
+                });
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pojav_launcher);
+        runFirstLaunchSetupIfNeeded();
         FragmentManager fragmentManager = getSupportFragmentManager();
         // If we don't have a back stack root yet...
         if(fragmentManager.getBackStackEntryCount() < 1) {
