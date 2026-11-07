@@ -6,7 +6,7 @@
     android:id="@+id/fragment_menu_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_app">
+    android:background="#F2F4F2">
 
     <ScrollView
         android:id="@+id/home_scroll"
@@ -42,7 +42,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/mylauncher_brand_title"
-                        android:text="MY LAUNCHER"
+                        android:text="@string/mylauncher_brand"
                         android:textColor="#000000"
                         android:textSize="20sp"
                         android:textStyle="bold"
@@ -51,7 +51,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="MINECRAFT JAVA WORKSPACE"
+                        android:text="@string/mylauncher_subtitle"
                         android:textColor="#555555"
                         android:textSize="10sp"
                         android:letterSpacing="0.12" />
@@ -62,7 +62,7 @@
                     android:background="@drawable/mylauncher_light_card"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="7dp"
-                    android:text="● SYSTEM READY"
+                    android:text="@string/mylauncher_system_ready"
                     android:textColor="#159900"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -72,13 +72,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp"
+                android:padding="16dp"
                 android:background="@drawable/mylauncher_light_card">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="YOUR NEXT WORLD"
+                    android:text="@string/mylauncher_next_world"
                     android:textColor="#159900"
                     android:textSize="10sp"
                     android:textStyle="bold"
@@ -87,7 +87,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Ready to play?"
+                    android:text="@string/mylauncher_ready_play"
                     android:textColor="#000000"
                     android:textSize="25sp"
                     android:textStyle="bold" />
@@ -95,7 +95,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="เลือกเวอร์ชัน Minecraft แล้วเริ่มการผจญภัยของคุณ"
+                    android:text="@string/mylauncher_choose_version"
                     android:textColor="#444444"
                     android:textSize="12sp" />
                 <TextView
@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="8dp"
-                android:text="QUICK ACCESS"
+                android:text="@string/mylauncher_quick_access"
                 android:textColor="#111111"
                 android:textSize="11sp"
                 android:textStyle="bold"
@@ -153,12 +153,12 @@
                     android:id="@+id/download_center_button"
                     style="@style/LauncherMenuButton.Universal"
                     android:layout_width="0dp"
-                    android:layout_height="58dp"
+                    android:layout_height="52dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="5dp"
                     android:background="@drawable/mylauncher_light_card"
                     android:drawableStart="@drawable/ic_folder"
-                    android:text="Download Center"
+                    android:text="@string/mylauncher_download_center"
                     android:textColor="#000000"
                     android:textSize="11sp" />
                 <com.kdt.mcgui.LauncherMenuButton
@@ -170,7 +170,7 @@
                     android:layout_marginStart="5dp"
                     android:background="@drawable/mylauncher_light_card"
                     android:drawableStart="@android:drawable/ic_lock_lock"
-                    android:text="Security Center"
+                    android:text="@string/mylauncher_security_center"
                     android:textColor="#000000"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -190,7 +190,7 @@
                 android:id="@+id/custom_control_button"
                 style="@style/LauncherMenuButton.Universal"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="44dp"
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@drawable/ic_menu_custom_controls"
                 android:text="@string/mcl_option_customcontrol"
@@ -293,7 +293,7 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="6dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:contentDescription="Edit profile"
+                android:contentDescription="@string/mylauncher_edit_profile"
                 android:src="@drawable/ic_edit_profile" />
         </LinearLayout>
         <com.kdt.mcgui.MineButton
