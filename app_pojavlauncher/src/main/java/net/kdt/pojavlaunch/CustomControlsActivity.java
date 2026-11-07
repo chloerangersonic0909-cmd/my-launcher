@@ -1,5 +1,6 @@
 package net.kdt.pojavlaunch;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,9 +19,12 @@ import net.kdt.pojavlaunch.customcontrols.EditorExitable;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class CustomControlsActivity extends BaseActivity implements EditorExitable {
+	private static final int REQUEST_IMPORT_CONTROL_FILE = 5701;
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerNavigationView;
 	private ControlLayout mControlLayout;
@@ -39,7 +43,9 @@ public class CustomControlsActivity extends BaseActivity implements EditorExitab
 		mPullDrawerButton.setOnClickListener(v -> mDrawerLayout.openDrawer(mDrawerNavigationView));
 		mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
-		mDrawerNavigationView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,getResources().getStringArray(R.array.menu_customcontrol_customactivity)));
+		ArrayList<String> menuItems = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.menu_customcontrol_customactivity)));
+		menuItems.add(getString(R.string.customctrl_import));
+		mDrawerNavigationView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, menuItems));
 		mDrawerNavigationView.setOnItemClickListener((parent, view, position, id) -> {
 			switch(position) {
 				case 0: mControlLayout.addControlButton(new ControlData("New")); break;
@@ -48,6 +54,7 @@ public class CustomControlsActivity extends BaseActivity implements EditorExitab
 				case 3: mControlLayout.openLoadDialog(); break;
 				case 4: mControlLayout.openSaveDialog(this); break;
 				case 5: mControlLayout.openSetDefaultDialog(); break;
+				case 7: openControlImportPicker(); break;
 				case 6: // Saving the currently shown control
 					try {
 						Uri contentUri = DocumentsContract.buildDocumentUri(getString(R.string.storageProviderAuthorities), mControlLayout.saveToDirectory(mControlLayout.mLayoutFileName));
@@ -72,6 +79,29 @@ public class CustomControlsActivity extends BaseActivity implements EditorExitab
 		}catch (IOException e) {
 			Tools.showError(this, e);
 		}
+	}
+
+	private void openControlImportPicker() {
+		Intent picker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+		picker.addCategory(Intent.CATEGORY_OPENABLE);
+		picker.setType("*/*");
+		picker.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/json", "text/json", "text/plain"});
+		try {
+			startActivityForResult(Intent.createChooser(picker, getString(R.string.customctrl_import)), REQUEST_IMPORT_CONTROL_FILE);
+		} catch (Exception e) {
+			Tools.showError(this, e);
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode != REQUEST_IMPORT_CONTROL_FILE || resultCode != Activity.RESULT_OK || data == null || data.getData() == null) return;
+
+		Intent importIntent = new Intent(this, ImportControlActivity.class);
+		importIntent.setData(data.getData());
+		importIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+		startActivity(importIntent);
 	}
 
 	@Override
