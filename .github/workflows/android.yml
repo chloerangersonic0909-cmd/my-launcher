@@ -30,7 +30,11 @@ jobs:
             exit 1
           fi
           python3 - <<'PY'
-          import json, os, urllib.request
+          import json, os, re, urllib.error, urllib.parse, urllib.request
+          webhook_url = os.environ["DISCORD_WEBHOOK_URL"].strip()
+          parsed = urllib.parse.urlsplit(webhook_url)
+          if parsed.scheme != "https" or parsed.hostname not in ("discord.com", "discordapp.com") or not re.fullmatch(r"/api/webhooks/\\d+/[A-Za-z0-9._-]+/?", parsed.path):
+              raise SystemExit("DISCORD_WEBHOOK_URL format is invalid. Copy the full Webhook URL from Discord Integrations.")
           payload = {
               "username": "My Launcher Test",
               "embeds": [{
@@ -45,15 +49,25 @@ jobs:
               }]
           }
           request = urllib.request.Request(
-              os.environ["DISCORD_WEBHOOK_URL"],
+              webhook_url,
               data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json"},
+              headers={"Content-Type": "application/json", "User-Agent": "MyLauncher-GitHubActions/1.0"},
               method="POST"
           )
-          with urllib.request.urlopen(request, timeout=20) as response:
-              print("Discord webhook test status:", response.status)
-              if response.status not in (200, 204):
-                  raise SystemExit("Discord webhook test failed")
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  print("Discord webhook test status:", response.status)
+                  if response.status not in (200, 204):
+                      raise SystemExit("Discord returned an unexpected HTTP status.")
+          except urllib.error.HTTPError as error:
+              body = error.read(1000).decode("utf-8", errors="replace")
+              print("Discord rejected the webhook request.")
+              print("HTTP status:", error.code)
+              print("Discord response:", body or "(empty response)")
+              raise SystemExit("Webhook test failed. Use the Discord response above to identify the cause.")
+          except urllib.error.URLError as error:
+              print("Could not reach Discord:", getattr(error, "reason", "network error"))
+              raise SystemExit("Webhook test failed because Discord could not be reached.")
           PY
 
   build:
