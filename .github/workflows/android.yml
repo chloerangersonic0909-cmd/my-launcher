@@ -149,7 +149,9 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: My Launcher ${{ github.ref_name }}
           body: "My Launcher รุ่น ${{ github.ref_name }} พร้อมดาวน์โหลด"
-          files: out/app-release.apk
+          files: |
+            out/app-release.apk
+            out/app-debug.apk
 
       # Notify the same Discord channel whenever a debug APK build succeeds.
       - name: Notify Discord about successful APK build
