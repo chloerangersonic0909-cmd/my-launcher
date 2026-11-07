@@ -331,6 +331,10 @@ public class CallbackBridge {
     @Keep
     private static void onGrabStateChanged(final boolean grabbing) {
         isGrabbing = grabbing;
+        // Hand cursor in menus; normal arrow when Minecraft captures the mouse.
+        if (MinecraftGLSurface.sdlEnabled) {
+            SDLActivity.setSystemCursor(grabbing ? 0 : 11);
+        }
         sChoreographer.postFrameCallbackDelayed((time) -> {
             // If the grab re-changed, skip notify process
             if(isGrabbing != grabbing) return;
