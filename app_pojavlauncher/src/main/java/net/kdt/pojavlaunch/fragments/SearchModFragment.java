@@ -26,6 +26,8 @@ import net.kdt.pojavlaunch.modloaders.modpacks.api.ModpackApi;
 import net.kdt.pojavlaunch.modloaders.modpacks.models.SearchFilters;
 import net.kdt.pojavlaunch.profiles.VersionSelectorDialog;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
+import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
+import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
 
 public class SearchModFragment extends Fragment implements ModItemAdapter.SearchResultCallback {
 
@@ -51,11 +53,17 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
     private ModpackApi modpackApi;
 
     private final SearchFilters mSearchFilters;
+    private final boolean mIsModpack;
 
     public SearchModFragment(){
+        this(true);
+    }
+
+    protected SearchModFragment(boolean isModpack){
         super(R.layout.fragment_mod_search);
+        mIsModpack = isModpack;
         mSearchFilters = new SearchFilters();
-        mSearchFilters.isModpack = true;
+        mSearchFilters.isModpack = isModpack;
     }
 
     @Override
@@ -77,6 +85,21 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
         mRecyclerview = view.findViewById(R.id.search_mod_list);
         mStatusTextView = view.findViewById(R.id.search_mod_status_text);
         mFilterButton = view.findViewById(R.id.search_mod_filter);
+        if (!mIsModpack) {
+            mSearchEditText.setHint("ค้นหาม็อดบน Modrinth / CurseForge");
+            try {
+                String versionId = AsyncMinecraftDownloader.normalizeVersionId(LauncherProfiles.getCurrentProfile().lastVersionId);
+                mSearchFilters.mcVersion = resolveMinecraftVersion(versionId);
+                if (versionId != null) {
+                    if (versionId.startsWith("fabric-loader-")) mSearchFilters.loader = "fabric";
+                    else if (versionId.startsWith("quilt-loader-")) mSearchFilters.loader = "quilt";
+                    else if (versionId.startsWith("neoforge-")) mSearchFilters.loader = "neoforge";
+                    else if (versionId.contains("-forge-")) mSearchFilters.loader = "forge";
+                }
+            } catch (Exception ignored) {
+                // Keep the search usable when no profile is selected.
+            }
+        }
 
         mDefaultTextColor = mStatusTextView.getTextColors();
 
@@ -130,6 +153,21 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
                 mStatusTextView.setText(R.string.search_modpack_no_result);
                 break;
         }
+    }
+
+    private String resolveMinecraftVersion(String versionId) {
+        if (versionId == null || versionId.isEmpty()) return null;
+        int forgeIndex = versionId.indexOf("-forge-");
+        if (forgeIndex > 0) return versionId.substring(0, forgeIndex);
+        if (versionId.startsWith("fabric-loader-") || versionId.startsWith("quilt-loader-")) {
+            int lastDash = versionId.lastIndexOf('-');
+            if (lastDash > 0 && lastDash < versionId.length() - 1) return versionId.substring(lastDash + 1);
+        }
+        if (versionId.startsWith("neoforge-")) {
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("^neoforge-(\\d+)\\.(\\d+)\\..*$").matcher(versionId);
+            if (matcher.matches()) return "1." + matcher.group(1) + "." + matcher.group(2);
+        }
+        return versionId;
     }
 
     private void searchMods(String name) {
