@@ -52,33 +52,59 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="JAVA EDITION  •  GAME LIBRARY"
+                        android:text="JAVA EDITION"
                         android:textColor="#A9A7BA"
                         android:textSize="10sp"
                         android:letterSpacing="0.10" />
                 </LinearLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/mylauncher_dark_card"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:text="●  READY"
-                    android:textColor="#76E6C2"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
                 <ImageButton
                     android:id="@+id/mylauncher_settings_button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_marginStart="8dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="7dp"
+                    android:background="@drawable/mylauncher_circle_button"
                     android:contentDescription="Settings"
-                    android:src="@android:drawable/ic_menu_preferences"
+                    android:padding="13dp"
+                    android:src="@drawable/ic_menu_settings"
                     android:tint="#FFFFFF" />
+
+                <com.kdt.mcgui.LauncherMenuButton
+                    android:id="@+id/download_center_button"
+                    style="@style/LauncherMenuButton.Universal"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/mylauncher_circle_button_accent"
+                    android:contentDescription="Mods and Modpacks"
+                    android:drawableStart="@drawable/ic_add_modded"
+                    android:gravity="center"
+                    android:text=""
+                    android:textColor="#FFFFFF" />
+
+                <LinearLayout
+                    android:layout_width="58dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageButton
+                        android:id="@+id/edit_profile_button"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/mylauncher_circle_button"
+                        android:contentDescription="@string/mylauncher_edit_profile"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_edit_profile"
+                        android:tint="#75DDF2" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="PLAYER"
+                        android:textColor="#B8B7C7"
+                        android:textSize="8sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -169,18 +195,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <com.kdt.mcgui.LauncherMenuButton
-                    android:id="@+id/download_center_button"
-                    style="@style/LauncherMenuButton.Universal"
-                    android:layout_width="0dp"
-                    android:layout_height="58dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    android:background="@drawable/mylauncher_dark_card"
-                    android:drawableStart="@drawable/ic_folder"
-                    android:text="@string/mylauncher_download_center"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
                 <com.kdt.mcgui.LauncherMenuButton
                     android:id="@+id/install_version_button"
                     style="@style/LauncherMenuButton.Universal"
@@ -333,15 +347,6 @@
                 app:drawableEndSize="@dimen/_12sdp"
                 app:drawableStartIntegerScaling="true"
                 app:drawableStartSize="@dimen/_36sdp" />
-            <ImageButton
-                android:id="@+id/edit_profile_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="7dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:contentDescription="@string/mylauncher_edit_profile"
-                android:src="@drawable/ic_edit_profile"
-                android:tint="#FFFFFF" />
         </LinearLayout>
 
         <com.kdt.mcgui.MineButton
