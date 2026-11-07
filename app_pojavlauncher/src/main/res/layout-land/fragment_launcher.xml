@@ -6,7 +6,7 @@
     android:id="@+id/fragment_menu_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F2F4F2">
+    android:background="#F3F5F8">
 
     <LinearLayout
         android:id="@+id/windows_sidebar"
@@ -17,7 +17,7 @@
         android:paddingEnd="12dp"
         android:paddingTop="20dp"
         android:paddingBottom="12dp"
-        android:background="#ECEFEC"
+        android:background="#E9EDF3"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/windows_bottom_bar"
         app:layout_constraintStart_toStartOf="parent">
@@ -44,26 +44,6 @@
             android:textStyle="bold" />
 
         <com.kdt.mcgui.LauncherMenuButton
-            android:id="@+id/download_center_button"
-            style="@style/LauncherMenuButton.Universal"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:drawableStart="@drawable/ic_folder"
-            android:text="@string/mylauncher_download_center"
-            android:textColor="#000000"
-            android:textSize="12sp" />
-
-        <com.kdt.mcgui.LauncherMenuButton
-            android:id="@+id/security_center_button"
-            style="@style/LauncherMenuButton.Universal"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:drawableStart="@android:drawable/ic_lock_lock"
-            android:text="@string/mylauncher_security_center"
-            android:textColor="#000000"
-            android:textSize="12sp" />
-
-        <com.kdt.mcgui.LauncherMenuButton
             android:id="@+id/custom_control_button"
             style="@style/LauncherMenuButton.Universal"
             android:layout_width="match_parent"
@@ -88,7 +68,7 @@
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
-            android:background="#39FF14" />
+            android:background="#0A64C8" />
 
         <com.kdt.mcgui.LauncherMenuButton
             android:id="@+id/news_button"
@@ -173,17 +153,17 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/mylauncher_brand"
-                android:textColor="#000000"
-                android:textSize="24sp"
+                android:text="@string/mylauncher_ready_play"
+                android:textColor="#202020"
+                android:textSize="28sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/mylauncher_subtitle"
-                android:textColor="#444444"
+                android:layout_marginTop="5dp"
+                android:text="@string/mylauncher_choose_version"
+                android:textColor="#606060"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -200,7 +180,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/mylauncher_system_status"
-                    android:textColor="#159900"
+                    android:textColor="#0A64C8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -245,19 +225,53 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="10dp"
                 android:text="@string/mylauncher_quick_access"
-                android:textColor="#444444"
+                android:textColor="#555555"
                 android:textSize="11sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.kdt.mcgui.LauncherMenuButton
+                    android:id="@+id/download_center_button"
+                    style="@style/LauncherMenuButton.Universal"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="7dp"
+                    android:background="@drawable/mylauncher_light_card"
+                    android:drawableStart="@drawable/ic_folder"
+                    android:text="@string/mylauncher_download_center"
+                    android:textColor="#202020"
+                    android:textSize="13sp" />
+
+                <com.kdt.mcgui.LauncherMenuButton
+                    android:id="@+id/security_center_button"
+                    style="@style/LauncherMenuButton.Universal"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="7dp"
+                    android:background="@drawable/mylauncher_light_card"
+                    android:drawableStart="@android:drawable/ic_lock_lock"
+                    android:text="@string/mylauncher_security_center"
+                    android:textColor="#202020"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:layout_marginTop="18dp"
+                android:padding="14dp"
                 android:background="@drawable/mylauncher_light_card"
                 android:text="@string/mylauncher_quick_access_desc"
-                android:textColor="#31482D"
+                android:textColor="#505050"
                 android:textSize="13sp" />
         </LinearLayout>
     </ScrollView>
