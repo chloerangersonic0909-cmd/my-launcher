@@ -1931,94 +1931,107 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
      * This method is called by SDL using JNI.
      */
     public static boolean setCustomCursor(int cursorID) {
-
-        if (Build.VERSION.SDK_INT >= 24 /* Android 7.0 (N) */) {
-            try {
-                mSurface.setPointerIcon(mCursors.get(cursorID));
-            } catch (Exception e) {
-                return false;
-            }
-        } else {
+        if (Build.VERSION.SDK_INT < 24 || mSurface == null) {
             return false;
         }
-        return true;
+
+        try {
+            PointerIcon cursor = mCursors.get(cursorID);
+            if (cursor == null) {
+                return false;
+            }
+            mSurface.setPointerIcon(cursor);
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "Unable to apply custom mouse cursor", e);
+            return false;
+        }
     }
 
     /**
-     * This method is called by SDL using JNI.
+     * Maps SDL/GLFW cursor requests to Android's native pointer icons.
+     * Android supplies the platform artwork, so the cursor follows the
+     * connected mouse's system theme instead of drawing a launcher overlay.
      */
     public static boolean setSystemCursor(int cursorID) {
-        int cursor_type = 0; //PointerIcon.TYPE_NULL;
+        if (Build.VERSION.SDK_INT < 24 || mSurface == null) {
+            return false;
+        }
+
+        // Android PointerIcon type values (available from API 24).
+        final int TYPE_ARROW = 1000;
+        final int TYPE_HAND = 1002;
+        final int TYPE_PROGRESS = 1003;
+        final int TYPE_WAIT = 1004;
+        final int TYPE_CROSSHAIR = 1007;
+        final int TYPE_TEXT = 1008;
+        final int TYPE_NO_DROP = 1012;
+        final int TYPE_HORIZONTAL_DOUBLE_ARROW = 1014;
+        final int TYPE_VERTICAL_DOUBLE_ARROW = 1015;
+        final int TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW = 1016;
+        final int TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW = 1017;
+        final int TYPE_GRAB = 1020;
+
+        int cursorType;
         switch (cursorID) {
-        case SDL_SYSTEM_CURSOR_ARROW:
-            cursor_type = 1000; //PointerIcon.TYPE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_IBEAM:
-            cursor_type = 1008; //PointerIcon.TYPE_TEXT;
-            break;
-        case SDL_SYSTEM_CURSOR_WAIT:
-            cursor_type = 1004; //PointerIcon.TYPE_WAIT;
-            break;
-        case SDL_SYSTEM_CURSOR_CROSSHAIR:
-            cursor_type = 1007; //PointerIcon.TYPE_CROSSHAIR;
-            break;
-        case SDL_SYSTEM_CURSOR_WAITARROW:
-            cursor_type = 1004; //PointerIcon.TYPE_WAIT;
-            break;
-        case SDL_SYSTEM_CURSOR_SIZENWSE:
-            cursor_type = 1017; //PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_SIZENESW:
-            cursor_type = 1016; //PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_SIZEWE:
-            cursor_type = 1014; //PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_SIZENS:
-            cursor_type = 1015; //PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_SIZEALL:
-            cursor_type = 1020; //PointerIcon.TYPE_GRAB;
-            break;
-        case SDL_SYSTEM_CURSOR_NO:
-            cursor_type = 1012; //PointerIcon.TYPE_NO_DROP;
-            break;
-        case SDL_SYSTEM_CURSOR_HAND:
-            cursor_type = 1002; //PointerIcon.TYPE_HAND;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_TOPLEFT:
-            cursor_type = 1017; //PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_TOP:
-            cursor_type = 1015; //PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_TOPRIGHT:
-            cursor_type = 1016; //PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_RIGHT:
-            cursor_type = 1014; //PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_BOTTOMRIGHT:
-            cursor_type = 1017; //PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_BOTTOM:
-            cursor_type = 1015; //PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_BOTTOMLEFT:
-            cursor_type = 1016; //PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
-            break;
-        case SDL_SYSTEM_CURSOR_WINDOW_LEFT:
-            cursor_type = 1014; //PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
-            break;
+            case SDL_SYSTEM_CURSOR_ARROW:
+                cursorType = TYPE_ARROW;
+                break;
+            case SDL_SYSTEM_CURSOR_IBEAM:
+                cursorType = TYPE_TEXT;
+                break;
+            case SDL_SYSTEM_CURSOR_WAIT:
+                cursorType = TYPE_WAIT;
+                break;
+            case SDL_SYSTEM_CURSOR_CROSSHAIR:
+                cursorType = TYPE_CROSSHAIR;
+                break;
+            case SDL_SYSTEM_CURSOR_WAITARROW:
+                // Windows-style arrow with a progress indicator.
+                cursorType = TYPE_PROGRESS;
+                break;
+            case SDL_SYSTEM_CURSOR_SIZENWSE:
+            case SDL_SYSTEM_CURSOR_WINDOW_TOPLEFT:
+            case SDL_SYSTEM_CURSOR_WINDOW_BOTTOMRIGHT:
+                cursorType = TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
+                break;
+            case SDL_SYSTEM_CURSOR_SIZENESW:
+            case SDL_SYSTEM_CURSOR_WINDOW_TOPRIGHT:
+            case SDL_SYSTEM_CURSOR_WINDOW_BOTTOMLEFT:
+                cursorType = TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
+                break;
+            case SDL_SYSTEM_CURSOR_SIZEWE:
+            case SDL_SYSTEM_CURSOR_WINDOW_RIGHT:
+            case SDL_SYSTEM_CURSOR_WINDOW_LEFT:
+                cursorType = TYPE_HORIZONTAL_DOUBLE_ARROW;
+                break;
+            case SDL_SYSTEM_CURSOR_SIZENS:
+            case SDL_SYSTEM_CURSOR_WINDOW_TOP:
+            case SDL_SYSTEM_CURSOR_WINDOW_BOTTOM:
+                cursorType = TYPE_VERTICAL_DOUBLE_ARROW;
+                break;
+            case SDL_SYSTEM_CURSOR_SIZEALL:
+                cursorType = TYPE_GRAB;
+                break;
+            case SDL_SYSTEM_CURSOR_NO:
+                cursorType = TYPE_NO_DROP;
+                break;
+            case SDL_SYSTEM_CURSOR_HAND:
+                cursorType = TYPE_HAND;
+                break;
+            default:
+                // Unknown cursor requests must never accidentally hide the pointer.
+                cursorType = TYPE_ARROW;
+                break;
         }
-        if (Build.VERSION.SDK_INT >= 24 /* Android 7.0 (N) */) {
-            try {
-                mSurface.setPointerIcon(PointerIcon.getSystemIcon(getContext(), cursor_type));
-            } catch (Exception e) {
-                return false;
-            }
+
+        try {
+            mSurface.setPointerIcon(PointerIcon.getSystemIcon(getContext(), cursorType));
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "Unable to apply system mouse cursor type " + cursorID, e);
+            return false;
         }
-        return true;
     }
 
     /**
