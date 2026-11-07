@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/mylauncher_ready_play"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#111111"
                     android:textSize="25sp"
                     android:textStyle="bold" />
                 <TextView
@@ -96,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
                     android:text="@string/mylauncher_choose_version"
-                    android:textColor="#444444"
+                    android:textColor="#4A4954"
                     android:textSize="12sp" />
                 <TextView
                     android:id="@+id/background_status_text"
@@ -194,7 +194,7 @@
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@drawable/ic_menu_custom_controls"
                 android:text="@string/mcl_option_customcontrol"
-                android:textColor="#FFFFFF" />
+                android:textColor="#111111" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/install_jar_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -204,7 +204,7 @@
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@drawable/ic_menu_install_jar"
                 android:text="@string/main_install_jar_file"
-                android:textColor="#FFFFFF" />
+                android:textColor="#111111" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/news_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -214,7 +214,7 @@
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@drawable/ic_menu_news"
                 android:text="@string/mcl_tab_wiki"
-                android:textColor="#FFFFFF" />
+                android:textColor="#111111" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/discord_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -224,7 +224,7 @@
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@drawable/ic_discord"
                 android:text="@string/mcl_button_discord"
-                android:textColor="#FFFFFF" />
+                android:textColor="#111111" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/share_logs_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -234,7 +234,7 @@
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@android:drawable/ic_menu_share"
                 android:text="@string/main_share_logs"
-                android:textColor="#FFFFFF" />
+                android:textColor="#111111" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/open_files_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -244,7 +244,7 @@
                 android:background="@drawable/mylauncher_light_card"
                 android:drawableStart="@drawable/ic_folder"
                 android:text="@string/mcl_button_open_directory"
-                android:textColor="#FFFFFF" />
+                android:textColor="#111111" />
         </LinearLayout>
     </ScrollView>
 
