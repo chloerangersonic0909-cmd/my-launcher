@@ -37,18 +37,55 @@ public class ZipUtils {
      * @throws IOException if it was not possible to create a directory or file extraction failed
      */
     public static void zipExtract(ZipFile zipFile, String dirName, File destination) throws IOException {
-        Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
+        if (zipFile == null || destination == null || dirName == null) {
+            throw new IOException("Invalid ZIP extraction arguments");
+        }
+        if (!destination.exists() && !destination.mkdirs()) {
+            throw new IOException("Unable to create extraction directory");
+        }
 
-        int dirNameLen = dirName.length();
-        while(zipEntries.hasMoreElements()) {
+        final String rootPath = destination.getCanonicalPath() + File.separator;
+        Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
+        int extractedEntries = 0;
+        long totalBytes = 0L;
+        byte[] buffer = new byte[32768];
+
+        while (zipEntries.hasMoreElements()) {
             ZipEntry zipEntry = zipEntries.nextElement();
             String entryName = zipEntry.getName();
-            if(!entryName.startsWith(dirName) || zipEntry.isDirectory()) continue;
-            File zipDestination = new File(destination, entryName.substring(dirNameLen));
-            FileUtils.ensureParentDirectory(zipDestination);
+            if (entryName == null || !entryName.startsWith(dirName) || zipEntry.isDirectory()) continue;
+            if (++extractedEntries > 100000) throw new IOException("ZIP contains too many files");
+
+            String relativePath = entryName.substring(dirName.length()).replace('\\', '/');
+            if (relativePath.isEmpty() || relativePath.startsWith("/") || relativePath.indexOf('\0') >= 0) {
+                throw new IOException("Unsafe ZIP entry path");
+            }
+            for (String segment : relativePath.split("/")) {
+                if (segment.equals("..") || segment.equals(".") || segment.indexOf(':') >= 0) {
+                    throw new IOException("Unsafe ZIP entry path: " + entryName);
+                }
+            }
+
+            File outputFile = new File(destination, relativePath);
+            String outputPath = outputFile.getCanonicalPath();
+            if (!outputPath.startsWith(rootPath)) {
+                throw new IOException("ZIP entry escapes destination: " + entryName);
+            }
+            FileUtils.ensureParentDirectory(outputFile);
+
             try (InputStream inputStream = zipFile.getInputStream(zipEntry);
-                 OutputStream outputStream = new FileOutputStream(zipDestination)) {
-                IOUtils.copy(inputStream, outputStream);
+                 OutputStream outputStream = new FileOutputStream(outputFile)) {
+                int read;
+                long entryBytes = 0L;
+                while ((read = inputStream.read(buffer)) != -1) {
+                    entryBytes += read;
+                    totalBytes += read;
+                    if (entryBytes > 2L * 1024L * 1024L * 1024L ||
+                            totalBytes > 8L * 1024L * 1024L * 1024L) {
+                        throw new IOException("ZIP expands beyond the allowed size");
+                    }
+                    outputStream.write(buffer, 0, read);
+                }
             }
         }
     }
