@@ -12,16 +12,22 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -95,6 +101,9 @@ public class MinecraftGLSurface extends View implements GrabListener, DirectGame
     private boolean mLastGrabState = false;
     public static boolean sdlEnabled = false;
     boolean useSurfaceView = LauncherPreferences.PREF_USE_ALTERNATE_SURFACE;
+    private TextView mFpsOverlay;
+    private long mFpsWindowStartMs;
+    private int mFpsFrameCount;
 
     public MinecraftGLSurface(Context context) {
         this(context, null);
@@ -225,11 +234,15 @@ public class MinecraftGLSurface extends View implements GrabListener, DirectGame
 
                 @Override
                 public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
-                    // TODO: Triggers on eglSwapBuffers. Add a loading message and make it end here
+                    // TextureView receives this callback when a new rendered buffer is submitted.
+                    // Count these callbacks instead of sampling the display refresh rate.
+                    updateFpsCounter();
                 }
             });
 
-            ((ViewGroup)getParent()).addView(textureView);
+            ViewGroup gameContainer = (ViewGroup) getParent();
+            gameContainer.addView(textureView);
+            addFpsOverlay(gameContainer);
         }
 
 
@@ -487,6 +500,65 @@ public class MinecraftGLSurface extends View implements GrabListener, DirectGame
         }
 
         CallbackBridge.sendUpdateWindowSize(windowWidth, windowHeight);
+    }
+
+
+    /**
+     * Displays FPS measured from actual TextureView buffer updates (EGL frame submissions).
+     * SurfaceView mode is intentionally not given a fabricated FPS value because it does
+     * not expose an equivalent Java frame callback.
+     */
+    private void addFpsOverlay(ViewGroup container) {
+        if (useSurfaceView || !(container instanceof FrameLayout)) {
+            Log.i(TAG, "FPS overlay unavailable with SurfaceView rendering");
+            return;
+        }
+
+        float density = getResources().getDisplayMetrics().density;
+        mFpsOverlay = new TextView(getContext());
+        mFpsOverlay.setText("FPS --");
+        mFpsOverlay.setTextColor(Color.WHITE);
+        mFpsOverlay.setTextSize(12);
+        mFpsOverlay.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD);
+        int horizontalPadding = (int) (10 * density);
+        int verticalPadding = (int) (6 * density);
+        mFpsOverlay.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
+
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(0xCC101820);
+        background.setCornerRadius(8 * density);
+        background.setStroke(Math.max(1, (int) density), 0xFF36D9F5);
+        mFpsOverlay.setBackground(background);
+        mFpsOverlay.setElevation(8 * density);
+        mFpsOverlay.setClickable(false);
+        mFpsOverlay.setFocusable(false);
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.TOP | Gravity.START);
+        params.setMargins((int) (10 * density), (int) (10 * density), 0, 0);
+        container.addView(mFpsOverlay, params);
+    }
+
+    /** Called for each newly submitted TextureView frame. */
+    private void updateFpsCounter() {
+        if (mFpsOverlay == null) return;
+
+        long now = SystemClock.elapsedRealtime();
+        if (mFpsWindowStartMs == 0L) {
+            mFpsWindowStartMs = now;
+            mFpsFrameCount = 0;
+        }
+        mFpsFrameCount++;
+
+        long elapsed = now - mFpsWindowStartMs;
+        if (elapsed >= 500L) {
+            int fps = Math.round(mFpsFrameCount * 1000f / elapsed);
+            mFpsOverlay.setText("FPS " + fps);
+            mFpsFrameCount = 0;
+            mFpsWindowStartMs = now;
+        }
     }
 
     private void realStart(Surface surface){
