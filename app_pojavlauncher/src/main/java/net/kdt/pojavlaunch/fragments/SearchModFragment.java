@@ -138,19 +138,22 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
 
     @Override
     public void onDestroyView() {
+        if (mModItemAdapter != null) mModItemAdapter.cancelPendingTasks();
+        if (mModItemAdapter != null) ProgressKeeper.removeTaskCountListener(mModItemAdapter);
+        if (mRecyclerview != null) mRecyclerview.removeOnScrollListener(mOverlayPositionListener);
         super.onDestroyView();
-        ProgressKeeper.removeTaskCountListener(mModItemAdapter);
-        mRecyclerview.removeOnScrollListener(mOverlayPositionListener);
     }
 
     @Override
     public void onSearchFinished() {
+        if (!isAdded() || getView() == null || mSearchProgressBar == null || mStatusTextView == null) return;
         mSearchProgressBar.setVisibility(View.GONE);
         mStatusTextView.setVisibility(View.GONE);
     }
 
     @Override
     public void onSearchError(int error) {
+        if (!isAdded() || getView() == null || mSearchProgressBar == null || mStatusTextView == null) return;
         mSearchProgressBar.setVisibility(View.GONE);
         mStatusTextView.setVisibility(View.VISIBLE);
         switch (error) {
