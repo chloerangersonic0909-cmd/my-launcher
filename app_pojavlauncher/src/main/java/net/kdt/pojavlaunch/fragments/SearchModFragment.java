@@ -89,7 +89,7 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
         mStatusTextView = view.findViewById(R.id.search_mod_status_text);
         mFilterButton = view.findViewById(R.id.search_mod_filter);
         if (!mIsModpack) {
-            mSearchEditText.setHint("ค้นหาม็อดบน Modrinth");
+            mSearchEditText.setHint("Поиск модов в Modrinth");
             try {
                 String versionId = AsyncMinecraftDownloader.normalizeVersionId(LauncherProfiles.getCurrentProfile().lastVersionId);
                 mSearchFilters.mcVersion = resolveMinecraftVersion(versionId);
@@ -129,7 +129,7 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
         if (!mIsModpack && mSearchFilters.loader == null) {
             mSearchProgressBar.setVisibility(View.GONE);
             mStatusTextView.setVisibility(View.VISIBLE);
-            mStatusTextView.setText("โปรไฟล์นี้ยังไม่พบ Mod Loader ที่รองรับ กรุณาติดตั้ง Fabric, Forge, NeoForge หรือ Quilt ก่อนค้นหาและติดตั้งม็อด");
+            mStatusTextView.setText("Для этого профиля не найден поддерживаемый загрузчик модов. Сначала установите Fabric, Forge, NeoForge или Quilt.");
             return;
         }
         searchMods(null);
