@@ -385,7 +385,6 @@ public class LauncherActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pojav_launcher);
-        runFirstLaunchSetupIfNeeded();
         FragmentManager fragmentManager = getSupportFragmentManager();
         // If we don't have a back stack root yet...
         if(fragmentManager.getBackStackEntryCount() < 1) {
@@ -422,6 +421,11 @@ public class LauncherActivity extends BaseActivity {
         );
         getWindow().setBackgroundDrawable(null);
         bindViews();
+        // Start first-run setup only after the root fragment and host views are attached.
+        // This prevents authentication navigation racing FragmentManager initialization.
+        mFragmentView.post(() -> {
+            if (!isFinishing() && !isDestroyed()) runFirstLaunchSetupIfNeeded();
+        });
         // Check GitHub Releases after the launcher UI has settled.
         mFragmentView.postDelayed(() -> MyLauncherUpdater.checkForUpdates(this), 2500);
         checkNotificationPermission();
