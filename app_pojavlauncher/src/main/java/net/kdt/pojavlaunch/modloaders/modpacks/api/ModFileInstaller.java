@@ -26,11 +26,11 @@ public final class ModFileInstaller {
 
     public static void installAsync(Context context, ModDetail detail, int selectedVersion) {
         final Context app = context.getApplicationContext();
-        show(app, "กำลังดาวน์โหลดและตรวจสอบไฟล์ม็อด…");
+        show(app, "Загрузка и проверка файла мода…");
         PojavApplication.sExecutorService.execute(() -> {
             try {
                 File installed = install(detail, selectedVersion);
-                String message = "ติดตั้งม็อดสำเร็จ: " + installed.getName();
+                String message = "Мод установлен: " + installed.getName();
                 ModDetail.Dependencies[] dependencies = detail.dependencies != null
                         && selectedVersion < detail.dependencies.length
                         ? detail.dependencies[selectedVersion] : null;
@@ -41,30 +41,30 @@ public final class ModFileInstaller {
                     }
                 }
                 if (required > 0) {
-                    message += " • มี Required dependencies " + required + " รายการที่ต้องตรวจสอบเพิ่มเติม";
+                    message += " • Требуется установить зависимостей: " + required + " ";
                 }
                 show(app, message);
             } catch (Exception error) {
-                show(app, "ติดตั้งม็อดไม่สำเร็จ: " + safeMessage(error));
+                show(app, "Не удалось установить мод: " + safeMessage(error));
             }
         });
     }
 
     private static File install(ModDetail detail, int selectedVersion) throws Exception {
-        if (detail == null || detail.isModpack) throw new IllegalArgumentException("รายการนี้ไม่ใช่ม็อดเดี่ยว");
+        if (detail == null || detail.isModpack) throw new IllegalArgumentException("Это не отдельный мод");
         if (detail.versionUrls == null || selectedVersion < 0 || selectedVersion >= detail.versionUrls.length) {
-            throw new IllegalArgumentException("ไม่ได้เลือกเวอร์ชันม็อด");
+            throw new IllegalArgumentException("Версия мода не выбрана");
         }
 
         String source = detail.versionUrls[selectedVersion];
         if (source == null || !source.startsWith("https://")) {
-            throw new IllegalArgumentException("ลิงก์ดาวน์โหลดไม่ปลอดภัยหรือไม่ถูกต้อง");
+            throw new IllegalArgumentException("Недопустимая или небезопасная ссылка для загрузки");
         }
 
         File gameDir = Tools.getGameDirPath(LauncherProfiles.getCurrentProfile());
-        if (gameDir == null) throw new IllegalStateException("ไม่พบโฟลเดอร์เกมของโปรไฟล์ปัจจุบัน");
+        if (gameDir == null) throw new IllegalStateException("Не найдена папка игры текущего профиля");
         File modsDir = new File(gameDir, "mods");
-        if (!modsDir.exists() && !modsDir.mkdirs()) throw new IllegalStateException("สร้างโฟลเดอร์ mods ไม่สำเร็จ");
+        if (!modsDir.exists() && !modsDir.mkdirs()) throw new IllegalStateException("Не удалось создать папку mods");
 
         String fileName = Uri.parse(source).getLastPathSegment();
         if (fileName == null || !fileName.toLowerCase(Locale.ROOT).endsWith(".jar")) {
@@ -87,16 +87,16 @@ public final class ModFileInstaller {
             connection.setInstanceFollowRedirects(true);
             connection.setRequestProperty("User-Agent", "MyLauncher/1.0 (Minecraft mod installer)");
             int response = connection.getResponseCode();
-            if (response < 200 || response >= 300) throw new java.io.IOException("เซิร์ฟเวอร์ตอบกลับ HTTP " + response);
+            if (response < 200 || response >= 300) throw new java.io.IOException("Сервер вернул HTTP " + response);
             long announced = connection.getContentLengthLong();
-            if (announced > MAX_MOD_BYTES) throw new java.io.IOException("ไฟล์มีขนาดใหญ่เกิน 512 MB");
+            if (announced > MAX_MOD_BYTES) throw new java.io.IOException("Размер файла превышает 512 МБ");
 
             try (InputStream input = connection.getInputStream();
                  FileOutputStream output = new FileOutputStream(temporary)) {
                 byte[] buffer = new byte[32768];
                 int read;
                 while ((read = input.read(buffer)) != -1) {
-                    if (Thread.currentThread().isInterrupted()) throw new InterruptedException("ยกเลิกการดาวน์โหลด");
+                    if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Загрузка отменена");
                     total += read;
                     if (total > MAX_MOD_BYTES) throw new java.io.IOException("ไฟล์มีขนาดใหญ่เกิน 512 MB");
                     digest.update(buffer, 0, read);
@@ -117,20 +117,20 @@ public final class ModFileInstaller {
             String actual = toHex(digest.digest());
             if (!actual.equalsIgnoreCase(expected.trim())) {
                 temporary.delete();
-                throw new java.io.IOException("SHA-1 ไม่ตรงกัน ไฟล์อาจเสียหาย");
+                throw new java.io.IOException("Контрольная сумма SHA-1 не совпадает. Файл может быть повреждён");
             }
         }
 
         try (JarFile jar = new JarFile(temporary)) {
-            if (jar.size() == 0) throw new java.io.IOException("ไฟล์ JAR ว่างเปล่า");
+            if (jar.size() == 0) throw new java.io.IOException("Файл JAR пуст");
         } catch (Exception error) {
             temporary.delete();
-            throw new java.io.IOException("ไฟล์ที่ดาวน์โหลดไม่ใช่ JAR ที่ถูกต้อง", error);
+            throw new java.io.IOException("Загруженный файл не является корректным JAR", error);
         }
 
         if (!temporary.renameTo(destination)) {
             temporary.delete();
-            throw new java.io.IOException("บันทึกไฟล์ลงโฟลเดอร์ mods ไม่สำเร็จ");
+            throw new java.io.IOException("Не удалось сохранить файл в папку mods");
         }
         return destination;
     }
