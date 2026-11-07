@@ -1372,13 +1372,72 @@ public class GLFW
     }*/
 
     public static long glfwCreateCursor(@NativeType("const GLFWimage *") GLFWImage image, int xhot, int yhot) {
-        return 4L;
+        // Custom bitmap cursors are not available on the Android pointer API yet.
+        return GLFW_ARROW_CURSOR;
     }
+
     public static long glfwCreateStandardCursor(int shape) {
-        return 4L;
+        switch (shape) {
+            case GLFW_ARROW_CURSOR:
+            case GLFW_IBEAM_CURSOR:
+            case GLFW_CROSSHAIR_CURSOR:
+            case GLFW_POINTING_HAND_CURSOR:
+            case GLFW_RESIZE_EW_CURSOR:
+            case GLFW_RESIZE_NS_CURSOR:
+            case GLFW_RESIZE_NWSE_CURSOR:
+            case GLFW_RESIZE_NESW_CURSOR:
+            case GLFW_RESIZE_ALL_CURSOR:
+            case GLFW_NOT_ALLOWED_CURSOR:
+                return shape;
+            default:
+                return GLFW_ARROW_CURSOR;
+        }
     }
+
     public static void glfwDestroyCursor(@NativeType("GLFWcursor *") long cursor) {}
-    public static void glfwSetCursor(@NativeType("GLFWwindow *") long window, @NativeType("GLFWcursor *") long cursor) {}
+
+    public static void glfwSetCursor(@NativeType("GLFWwindow *") long window, @NativeType("GLFWcursor *") long cursor) {
+        int androidCursor;
+        switch ((int) cursor) {
+            case GLFW_IBEAM_CURSOR:
+                androidCursor = 1; // SDL_SYSTEM_CURSOR_IBEAM
+                break;
+            case GLFW_CROSSHAIR_CURSOR:
+                androidCursor = 3; // SDL_SYSTEM_CURSOR_CROSSHAIR
+                break;
+            case GLFW_POINTING_HAND_CURSOR:
+                androidCursor = 11; // SDL_SYSTEM_CURSOR_HAND
+                break;
+            case GLFW_RESIZE_EW_CURSOR:
+                androidCursor = 7; // SDL_SYSTEM_CURSOR_SIZEWE
+                break;
+            case GLFW_RESIZE_NS_CURSOR:
+                androidCursor = 8; // SDL_SYSTEM_CURSOR_SIZENS
+                break;
+            case GLFW_RESIZE_NWSE_CURSOR:
+                androidCursor = 5; // SDL_SYSTEM_CURSOR_SIZENWSE
+                break;
+            case GLFW_RESIZE_NESW_CURSOR:
+                androidCursor = 6; // SDL_SYSTEM_CURSOR_SIZENESW
+                break;
+            case GLFW_RESIZE_ALL_CURSOR:
+                androidCursor = 9; // SDL_SYSTEM_CURSOR_SIZEALL
+                break;
+            case GLFW_NOT_ALLOWED_CURSOR:
+                androidCursor = 10; // SDL_SYSTEM_CURSOR_NO
+                break;
+            case GLFW_ARROW_CURSOR:
+            default:
+                androidCursor = 0; // SDL_SYSTEM_CURSOR_ARROW
+                break;
+        }
+
+        try {
+            CallbackBridge.nativeNotifyLauncher(CallbackBridge.SDL, CallbackBridge.SET_CURSOR, androidCursor);
+        } catch (Throwable ignored) {
+            // Keep the game usable if launcher-side cursor integration is unavailable.
+        }
+    }
 
     public static boolean glfwRawMouseMotionSupported() {
         // Should be not supported?
