@@ -1512,15 +1512,41 @@ public final class Tools {
         return fileName;
     }
 
-    /** Swap the main fragment with another */
-    public static void swapFragment(FragmentActivity fragmentActivity , Class<? extends Fragment> fragmentClass,
+    /** Swap the main fragment with another without committing into a detached host. */
+    public static void swapFragment(FragmentActivity fragmentActivity, Class<? extends Fragment> fragmentClass,
                                     @Nullable String fragmentTag, @Nullable Bundle bundle) {
-        // When people tab out, it might happen
-        //TODO handle custom animations
-        fragmentActivity.getSupportFragmentManager().beginTransaction()
-                .setReorderingAllowed(true)
-                .addToBackStack(fragmentClass.getName())
-                .replace(R.id.container_fragment, fragmentClass, bundle, fragmentTag).commit();
+        if (fragmentActivity == null || fragmentClass == null) return;
+
+        Runnable transaction = () -> {
+            if (fragmentActivity.isFinishing() || fragmentActivity.isDestroyed()) return;
+
+            androidx.fragment.app.FragmentManager fragmentManager =
+                    fragmentActivity.getSupportFragmentManager();
+
+            // Async callbacks can outlive the Activity or run after its state was saved.
+            // In either case, do not enqueue a transaction against a detached host.
+            if (fragmentManager.isDestroyed() || fragmentManager.isStateSaved()) {
+                Log.w("Tools", "Ignoring fragment navigation after host state was saved/destroyed");
+                return;
+            }
+
+            try {
+                fragmentManager.beginTransaction()
+                        .setReorderingAllowed(true)
+                        .addToBackStack(fragmentClass.getName())
+                        .replace(R.id.container_fragment, fragmentClass, bundle, fragmentTag)
+                        .commit();
+            } catch (IllegalStateException exception) {
+                // A lifecycle transition may occur between the checks and commit.
+                Log.w("Tools", "Fragment navigation skipped because the host is no longer attached", exception);
+            }
+        };
+
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+            transaction.run();
+        } else {
+            fragmentActivity.runOnUiThread(transaction);
+        }
     }
 
     public static void backToMainMenu(FragmentActivity fragmentActivity) {
