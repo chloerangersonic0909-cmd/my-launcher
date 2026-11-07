@@ -81,6 +81,17 @@ public class ModpackCreateFragment extends Fragment {
         view.findViewById(R.id.button_browse_modpacks).setOnClickListener(v -> {
             tryInstall(SearchModFragment.class, SearchModFragment.TAG);
         });
+        view.findViewById(R.id.button_import_mod_jar).setOnClickListener(v -> {
+            Activity launcherActivity = requireActivity();
+            if (!(launcherActivity instanceof LauncherActivity)) {
+                throw new IllegalStateException("Cannot import a mod without LauncherActivity");
+            }
+            if (ProgressLayout.hasProcesses()) {
+                Toast.makeText(launcherActivity, R.string.tasks_ongoing, Toast.LENGTH_LONG).show();
+                return;
+            }
+            ((LauncherActivity) launcherActivity).modJarImportLauncher.launch(null);
+        });
         view.findViewById(R.id.button_import_modpack).setOnClickListener(v -> {
             Activity launcheractivity = requireActivity();
             if (!(launcheractivity instanceof LauncherActivity))
