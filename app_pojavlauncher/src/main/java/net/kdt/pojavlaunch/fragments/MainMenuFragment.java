@@ -95,6 +95,8 @@ public class MainMenuFragment extends Fragment {
                 Tools.swapFragment(requireActivity(), LauncherPreferenceFragment.class, "LauncherPreferenceFragment", null));
 
         ImageButton mEditProfileButton = view.findViewById(R.id.edit_profile_button);
+        View addAccountButton = view.findViewById(R.id.add_account_button);
+        if (addAccountButton != null) addAccountButton.setOnClickListener(v -> showAddAccountDialog());
         Button mPlayButton = view.findViewById(R.id.play_button);
         mVersionSpinner = view.findViewById(R.id.mc_version_spinner);
         mBackgroundStatus = view.findViewById(R.id.background_status_text);
@@ -123,7 +125,7 @@ public class MainMenuFragment extends Fragment {
                 return true;
             });
         } else mInstallJarButton.setOnClickListener(v -> hasNoOnlineProfileDialog(requireActivity()));
-        mEditProfileButton.setOnClickListener(v -> mVersionSpinner.openProfileEditor(requireActivity()));
+        mEditProfileButton.setOnClickListener(v -> showAddAccountDialog());
 
         mPlayButton.setOnClickListener(v -> {
             if (Tools.hasMods("sodium") && !(LauncherPreferences.DEFAULT_PREF.getBoolean("sodium_override", false))) {
@@ -163,6 +165,23 @@ public class MainMenuFragment extends Fragment {
      * This is a configuration check, not an antivirus or malware scan.
      */
     /** Hidden access to advanced game settings. The passcode is never displayed. */
+    private void showAddAccountDialog() {
+        if (!isAdded()) return;
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.mylauncher_add_account)
+                .setItems(new String[]{"Microsoft account", "Offline account"}, (dialog, which) -> {
+                    if (which == 0) {
+                        Tools.swapFragment(requireActivity(), MicrosoftLoginFragment.class,
+                                MicrosoftLoginFragment.TAG, null);
+                    } else {
+                        Tools.swapFragment(requireActivity(), LocalLoginFragment.class,
+                                LocalLoginFragment.TAG, null);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private void showHiddenAdvancedAccess() {
         if (!isAdded()) return;
         EditText input = new EditText(requireContext());
