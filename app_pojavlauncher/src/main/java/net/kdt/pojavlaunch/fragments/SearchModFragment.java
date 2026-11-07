@@ -90,6 +90,7 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
         mFilterButton = view.findViewById(R.id.search_mod_filter);
         if (!mIsModpack) {
             mSearchEditText.setHint("Поиск модов в Modrinth");
+            mFilterButton.setVisibility(View.GONE);
             try {
                 String versionId = AsyncMinecraftDownloader.normalizeVersionId(LauncherProfiles.getCurrentProfile().lastVersionId);
                 mSearchFilters.mcVersion = resolveMinecraftVersion(versionId);
