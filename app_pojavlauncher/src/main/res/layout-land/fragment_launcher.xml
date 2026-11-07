@@ -6,7 +6,7 @@
     android:id="@+id/fragment_menu_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4FFF1">
+    android:background="#FFFFFF">
 
     <LinearLayout
         android:id="@+id/windows_sidebar"
@@ -17,7 +17,7 @@
         android:paddingEnd="12dp"
         android:paddingTop="20dp"
         android:paddingBottom="12dp"
-        android:background="#E5FFE0"
+        android:background="#F7FFF5"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/windows_bottom_bar"
         app:layout_constraintStart_toStartOf="parent">
@@ -28,7 +28,7 @@
             android:paddingStart="10dp"
             android:paddingBottom="18dp"
             android:text="MY LAUNCHER"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="17sp"
             android:textStyle="bold" />
 
@@ -38,7 +38,7 @@
             android:paddingStart="10dp"
             android:paddingBottom="8dp"
             android:text="LIBRARY"
-            android:textColor="#5B7057"
+            android:textColor="#444444"
             android:textSize="10sp"
             android:textStyle="bold" />
 
@@ -49,7 +49,7 @@
             android:layout_height="48dp"
             android:drawableStart="@drawable/ic_folder"
             android:text="Download Center"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <com.kdt.mcgui.LauncherMenuButton
@@ -59,7 +59,7 @@
             android:layout_height="48dp"
             android:drawableStart="@android:drawable/ic_lock_lock"
             android:text="🛡️ Security Center"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <com.kdt.mcgui.LauncherMenuButton
@@ -69,7 +69,7 @@
             android:layout_height="48dp"
             android:drawableStart="@drawable/ic_menu_custom_controls"
             android:text="@string/mcl_option_customcontrol"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <com.kdt.mcgui.LauncherMenuButton
@@ -79,7 +79,7 @@
             android:layout_height="48dp"
             android:drawableStart="@drawable/ic_menu_install_jar"
             android:text="@string/main_install_jar_file"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <View
@@ -87,7 +87,7 @@
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
-            android:background="#CDEFC6" />
+            android:background="#39FF14" />
 
         <com.kdt.mcgui.LauncherMenuButton
             android:id="@+id/news_button"
@@ -96,7 +96,7 @@
             android:layout_height="48dp"
             android:drawableStart="@drawable/ic_menu_news"
             android:text="@string/mcl_tab_wiki"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <com.kdt.mcgui.LauncherMenuButton
@@ -106,7 +106,7 @@
             android:layout_height="48dp"
             android:drawableStart="@drawable/ic_discord"
             android:text="@string/mcl_button_discord"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <com.kdt.mcgui.LauncherMenuButton
@@ -116,7 +116,7 @@
             android:layout_height="48dp"
             android:drawableStart="@android:drawable/ic_menu_share"
             android:text="@string/main_share_logs"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <com.kdt.mcgui.LauncherMenuButton
@@ -126,7 +126,7 @@
             android:layout_height="48dp"
             android:drawableStart="@drawable/ic_folder"
             android:text="@string/mcl_button_open_directory"
-            android:textColor="#142313"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <View
@@ -139,7 +139,7 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="@string/app_version_label"
-            android:textColor="#5B7057"
+            android:textColor="#444444"
             android:textSize="10sp" />
 
         <TextView
@@ -147,7 +147,7 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="Minecraft • Android"
-            android:textColor="#5B7057"
+            android:textColor="#444444"
             android:textSize="10sp" />
     </LinearLayout>
 
@@ -172,8 +172,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Welcome to My Launcher"
-                android:textColor="#142313"
+                android:text="MY LAUNCHER"
+                android:textColor="#000000"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
@@ -181,8 +181,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Your Minecraft gaming workspace"
-                android:textColor="#5B7057"
+                android:text="MINECRAFT JAVA WORKSPACE"
+                android:textColor="#444444"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -199,7 +199,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="SYSTEM STATUS"
-                    android:textColor="#20C900"
+                    android:textColor="#159900"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -209,7 +209,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/mylauncher_game_not_running"
-                    android:textColor="#142313"
+                    android:textColor="#000000"
                     android:textSize="15sp" />
 
                 <LinearLayout
@@ -246,7 +246,7 @@
                 android:layout_marginTop="22dp"
                 android:layout_marginBottom="8dp"
                 android:text="QUICK ACCESS"
-                android:textColor="#5B7057"
+                android:textColor="#444444"
                 android:textSize="11sp"
                 android:textStyle="bold" />
 
@@ -255,7 +255,7 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:background="@drawable/mylauncher_light_card"
-                android:text="Manage versions, mods, shaders, resource packs and worlds from Download Center."
+                android:text="จัดการเวอร์ชัน Mods, Shaders, Resource Packs และ Worlds ได้จาก Download Center"
                 android:textColor="#31482D"
                 android:textSize="13sp" />
         </LinearLayout>
