@@ -60,10 +60,22 @@ public interface ModpackApi {
         PojavApplication.sExecutorService.execute(() -> {
             try {
                 ModLoader loaderInfo = installMod(modDetail, selectedVersion);
-                if (loaderInfo == null) return;
-                loaderInfo.getDownloadTask(new NotificationDownloadListener(context, loaderInfo)).run();
-            }catch (IOException e) {
-                Tools.showErrorRemote(context, R.string.modpack_install_download_failed, e);
+                if (loaderInfo == null) {
+                    ProgressLayout.clearProgress(ProgressLayout.INSTALL_MODPACK);
+                    Tools.showErrorRemote(context, R.string.modpack_install_download_failed,
+                            new IOException("The selected modpack did not provide a supported mod loader"));
+                    return;
+                }
+                Runnable downloadTask = loaderInfo.getDownloadTask(new NotificationDownloadListener(context, loaderInfo));
+                if (downloadTask == null) throw new IOException("Unsupported mod loader installation task");
+                downloadTask.run();
+            } catch (IOException error) {
+                ProgressLayout.clearProgress(ProgressLayout.INSTALL_MODPACK);
+                Tools.showErrorRemote(context, R.string.modpack_install_download_failed, error);
+            } catch (RuntimeException error) {
+                ProgressLayout.clearProgress(ProgressLayout.INSTALL_MODPACK);
+                Tools.showErrorRemote(context, R.string.modpack_install_download_failed,
+                        new IOException("Unexpected modpack installation error", error));
             }
         });
     }
