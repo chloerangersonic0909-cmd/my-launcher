@@ -44,7 +44,7 @@ public class VersionInstallerFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull android.view.LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle state) {
-        int white = Color.WHITE, muted = Color.rgb(178, 177, 195);
+        int white = Color.WHITE, muted = Color.WHITE;
         ScrollView scroll = new ScrollView(requireContext());
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(Color.rgb(5, 5, 12));
@@ -153,7 +153,7 @@ public class VersionInstallerFragment extends Fragment {
             info.setOrientation(LinearLayout.VERTICAL);
             TextView name = text(version.id, 15, Color.WHITE, true);
             TextView meta = text("Minecraft Java Edition  •  " + labelFor(version.type), 10,
-                    Color.rgb(165, 162, 183), false);
+                    Color.WHITE, false);
             info.addView(name); LinearLayout.LayoutParams mp = match(); mp.topMargin = dp(4); info.addView(meta, mp);
             card.addView(info, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
             TextView install = text("SELECT  ›", 11, Color.WHITE, true);
