@@ -22,6 +22,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.text.InputType;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -101,6 +103,9 @@ public class MainMenuFragment extends Fragment {
         if (mStopGameButton != null) {
             mStopGameButton.setOnClickListener(v -> confirmStopGame());
         }
+        View hiddenAccess = view.findViewById(R.id.mylauncher_brand_title);
+        if (hiddenAccess != null) hiddenAccess.setOnLongClickListener(v -> { showHiddenAdvancedAccess(); return true; });
+
         applyCustomBackground(view);
         refreshBackgroundControls();
 
