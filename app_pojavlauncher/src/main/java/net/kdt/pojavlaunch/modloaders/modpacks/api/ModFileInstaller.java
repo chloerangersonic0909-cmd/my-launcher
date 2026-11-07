@@ -16,7 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarFile;
 
 /** Installs one verified mod JAR into the currently selected Minecraft instance. */
@@ -27,6 +26,7 @@ public final class ModFileInstaller {
 
     public static void installAsync(Context context, ModDetail detail, int selectedVersion) {
         final Context app = context.getApplicationContext();
+        show(app, "กำลังดาวน์โหลดและตรวจสอบไฟล์ม็อด…");
         PojavApplication.sExecutorService.execute(() -> {
             try {
                 File installed = install(detail, selectedVersion);
@@ -52,7 +52,7 @@ public final class ModFileInstaller {
 
     private static File install(ModDetail detail, int selectedVersion) throws Exception {
         if (detail == null || detail.isModpack) throw new IllegalArgumentException("รายการนี้ไม่ใช่ม็อดเดี่ยว");
-        if (selectedVersion < 0 || selectedVersion >= detail.versionUrls.length) {
+        if (detail.versionUrls == null || selectedVersion < 0 || selectedVersion >= detail.versionUrls.length) {
             throw new IllegalArgumentException("ไม่ได้เลือกเวอร์ชันม็อด");
         }
 
