@@ -158,6 +158,7 @@
     <string name="customctrl_restore_default_confirm">This replaces the current default control layout with the original bundled layout. Saved custom layouts will not be deleted. Continue?</string>
     <string name="customctrl_restore_default_done">Default controls restored</string>
     <string name="customctrl_export">Export controlmap</string>
+    <string name="customctrl_import">Import controls (.json)</string>
 
     <string name="main_share_logs">Share log file</string>
     <string name="main_install_jar_file">Execute a .jar</string>
