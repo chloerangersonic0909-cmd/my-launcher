@@ -209,6 +209,18 @@
             app:drawableStartIntegerScaling="true"
             app:drawableStartSize="@dimen/_36sdp" />
 
+        <com.kdt.mcgui.LauncherMenuButton
+            android:id="@+id/install_version_button"
+            style="@style/LauncherMenuButton.Universal"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/mylauncher_dark_card"
+            android:drawableStart="@android:drawable/ic_menu_add"
+            android:text="@string/mylauncher_install_version"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
         <com.kdt.mcgui.MineButton
             android:id="@+id/play_button"
             android:layout_width="match_parent"
