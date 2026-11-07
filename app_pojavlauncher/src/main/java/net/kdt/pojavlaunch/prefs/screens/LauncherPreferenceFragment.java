@@ -50,6 +50,18 @@ public class LauncherPreferenceFragment extends PreferenceFragmentCompat impleme
     public void onCreatePreferences(Bundle b, String str) {
         addPreferencesFromResource(R.xml.pref_main);
         setupNotificationRequestPreference();
+        Preference officialDiscord = findPreference("official_discord_link");
+        if (officialDiscord != null) {
+            officialDiscord.setOnPreferenceClickListener(preference -> {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.discord_invite))));
+                } catch (Exception e) {
+                    Toast.makeText(requireContext(), "ไม่พบแอปสำหรับเปิดลิงก์", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            });
+        }
+
         Preference chooseBackground = findPreference("background_image_pick");
         if (chooseBackground != null) {
             chooseBackground.setOnPreferenceClickListener(preference -> {
