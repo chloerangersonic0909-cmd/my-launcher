@@ -126,7 +126,45 @@ public class MinecraftDownloader {
      * @param versionName The version ID (necessary)
      * @throws Exception when an exception occurs in the function body or in any of the downloading threads.
      */
+    /**
+     * Resolve metadata from the version manifest when the launcher starts before its
+     * asynchronous version-list refresh has completed. Without this fallback a null
+     * manifest entry makes the downloader look only for an already-installed JSON file.
+     */
+    private JMinecraftVersionList.Version resolveVersionInfo(String versionName) throws IOException {
+        JMinecraftVersionList versionList = null;
+        File manifestFile = new File(Tools.DIR_CACHE, "version_list.json");
+
+        if (manifestFile.isFile() && manifestFile.canRead()) {
+            try {
+                versionList = Tools.GLOBAL_GSON.fromJson(
+                        Tools.read(manifestFile.getAbsolutePath()), JMinecraftVersionList.class);
+            } catch (Exception e) {
+                Log.w("MinecraftDownloader", "Cached version manifest is unreadable; refreshing it", e);
+            }
+        }
+
+        if (versionList == null || versionList.versions == null) {
+            String manifestJson = DownloadUtils.downloadString(LauncherPreferences.PREF_VERSION_REPOS);
+            versionList = Tools.GLOBAL_GSON.fromJson(manifestJson, JMinecraftVersionList.class);
+        }
+
+        if (versionList == null || versionList.versions == null) {
+            throw new IOException("Minecraft version manifest is empty or invalid");
+        }
+
+        for (JMinecraftVersionList.Version version : versionList.versions) {
+            if (version != null && versionName.equals(version.id)) {
+                return version;
+            }
+        }
+        throw new IOException("Version " + versionName + " is missing from the Minecraft version manifest");
+    }
+
     private void downloadGame(Activity activity, JMinecraftVersionList.Version verInfo, String versionName) throws Exception {
+        if (verInfo == null) {
+            verInfo = resolveVersionInfo(versionName);
+        }
         // Put up a dummy progress line, for the activity to start the service and do all the other necessary
         // work to keep the launcher alive. We will replace this line when we will start downloading stuff.
         ProgressLayout.setProgress(ProgressLayout.DOWNLOAD_MINECRAFT, 0, R.string.newdl_starting);
