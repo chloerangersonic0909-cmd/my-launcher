@@ -6,7 +6,7 @@
     android:id="@+id/fragment_menu_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1F1E23">
+    android:background="@drawable/mylauncher_cosmos_background">
 
     <LinearLayout
         android:id="@+id/zalith_top_bar"
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/mylauncher_brand"
-            android:textColor="#E7E5EC"
+            android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -47,7 +47,7 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/mylauncher_edit_profile"
             android:src="@drawable/ic_edit_profile"
-            android:tint="#D6D4DD" />
+            android:tint="#FFFFFF" />
 
         <com.kdt.mcgui.LauncherMenuButton
             android:id="@+id/download_center_button"
@@ -87,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/mylauncher_subtitle"
-            android:textColor="#9A98A3"
+            android:textColor="#C7C5D4"
             android:textSize="13sp"
             android:letterSpacing="0.08" />
 
@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="@string/mylauncher_system_ready"
-            android:textColor="#B7C9FF"
+            android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -113,7 +113,7 @@
                 android:layout_height="42dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/mcl_option_customcontrol"
-                android:textColor="#D6D4DD" />
+                android:textColor="#FFFFFF" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/install_jar_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -143,7 +143,7 @@
                 android:layout_height="40dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/mcl_button_discord"
-                android:textColor="#B7B4C0" />
+                android:textColor="#D8D7E2" />
             <com.kdt.mcgui.LauncherMenuButton
                 android:id="@+id/share_logs_button"
                 style="@style/LauncherMenuButton.Universal"
@@ -164,7 +164,7 @@
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:padding="20dp"
-        android:background="@drawable/mylauncher_dark_card"
+        android:background="@drawable/mylauncher_light_card"
         app:layout_constraintTop_toBottomOf="@id/zalith_top_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -184,7 +184,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="＋"
-                android:textColor="#E5E3EA"
+                android:textColor="#111111"
                 android:textSize="48sp" />
             <TextView
                 android:layout_width="wrap_content"
@@ -200,7 +200,8 @@
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:layout_marginTop="8dp"
-            android:background="#29282E"
+            android:background="@drawable/mylauncher_light_card"
+            android:textColor="#111111"
             android:drawableEnd="@drawable/spinner_arrow"
             android:paddingStart="10dp"
             app:drawableEndPadding="@dimen/_1sdp"
@@ -219,9 +220,9 @@
             android:clickable="true"
             android:focusable="true"
             android:elevation="4dp"
-            android:backgroundTint="#AFC5FF"
+            android:backgroundTint="#090910"
             android:text="@string/main_play"
-            android:textColor="#222A40"
+            android:textColor="#FFFFFF"
             android:textSize="17sp"
             android:textStyle="bold"
             android:textAllCaps="false" />
@@ -232,7 +233,7 @@
             android:layout_marginTop="6dp"
             android:gravity="center"
             android:text="@string/mylauncher_no_installed_versions_hint"
-            android:textColor="#A8A6B0"
+            android:textColor="#4A4954"
             android:textSize="11sp" />
     </LinearLayout>
 
