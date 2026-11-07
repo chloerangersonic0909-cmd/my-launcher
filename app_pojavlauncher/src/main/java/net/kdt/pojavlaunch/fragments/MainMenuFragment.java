@@ -158,6 +158,31 @@ public class MainMenuFragment extends Fragment {
      * Performs a local, best-effort security review of this installed launcher.
      * This is a configuration check, not an antivirus or malware scan.
      */
+    /** Hidden access to advanced game settings. The passcode is never displayed. */
+    private void showHiddenAdvancedAccess() {
+        if (!isAdded()) return;
+        EditText input = new EditText(requireContext());
+        input.setSingleLine(true);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setHint("Access code");
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        input.setPadding(padding, padding, padding, padding);
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Advanced access")
+                .setView(input)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton("ยืนยัน", (dialog, which) -> {
+                    String entered = input.getText() == null ? "" : input.getText().toString();
+                    if ("Bb00u".equals(entered)) {
+                        Tools.swapFragment(requireActivity(), AdvancedGameSettingsFragment.class,
+                                AdvancedGameSettingsFragment.TAG, null);
+                    } else {
+                        Toast.makeText(requireContext(), "รหัสไม่ถูกต้อง", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
+    }
+
     private void showSecurityCenter() {
         if (!isAdded()) return;
         StringBuilder report = new StringBuilder();
