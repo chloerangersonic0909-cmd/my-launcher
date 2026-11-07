@@ -157,12 +157,43 @@ public class DownloadUtils {
         int attempts = 0;
         boolean fileOkay = verifyFile(outputFile, sha1);
         T result = null;
-        while (attempts < 5 && !fileOkay){
+        IOException lastDownloadError = null;
+        while (attempts < 5 && !fileOkay) {
             attempts++;
-            downloadFile(downloadFunction);
-            fileOkay = verifyFile(outputFile, sha1);
+            try {
+                downloadFile(downloadFunction);
+                fileOkay = verifyFile(outputFile, sha1);
+                if (!fileOkay) {
+                    Log.w("DownloadUtils", "SHA-1 mismatch on attempt " + attempts
+                            + "/5 for " + outputFile.getName());
+                }
+            } catch (IOException e) {
+                lastDownloadError = e;
+                Log.w("DownloadUtils", "Download interrupted on attempt " + attempts
+                        + "/5 for " + outputFile.getName(), e);
+            }
+
+            if (!fileOkay && outputFile.exists() && !outputFile.delete()) {
+                throw new IOException("Unable to remove incomplete download: "
+                        + outputFile.getAbsolutePath(), lastDownloadError);
+            }
+
+            if (!fileOkay && attempts < 5) {
+                try {
+                    Thread.sleep(700L * attempts);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Download retry interrupted", interrupted);
+                }
+            }
         }
-        if(!fileOkay) throw new SHA1VerificationException("SHA1 verifcation failed after 5 download attempts");
+        if (!fileOkay) {
+            if (lastDownloadError != null) {
+                throw new IOException("Download failed after 5 attempts: "
+                        + outputFile.getName(), lastDownloadError);
+            }
+            throw new SHA1VerificationException("SHA1 verification failed after 5 download attempts");
+        }
         return result;
     }
 
