@@ -10,6 +10,16 @@
     <net.kdt.pojavlaunch.prefs.BackButtonPreference/>
 
     <PreferenceCategory
+        android:title="Official Community"
+        >
+        <Preference
+            android:key="official_discord_link"
+            android:title="My Launcher Official Discord"
+            android:summary="ข่าวสาร ดาวน์โหลด และรับความช่วยเหลือจากชุมชน"
+            android:icon="@drawable/ic_discord" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="Appearance / รูปลักษณ์"
         >
         <Preference
