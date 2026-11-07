@@ -140,7 +140,7 @@ public final class BackupManager {
                     }
 
                     File target = resolveSafeEntry(staging, name);
-                    String normalized = name.replace('\\\\', '/');
+                    String normalized = name.replace('\\', '/');
                     String root = normalized.contains("/")
                             ? normalized.substring(0, normalized.indexOf('/')) : normalized;
                     if (!ALLOWED_ROOTS.contains(root)) {
@@ -184,7 +184,7 @@ public final class BackupManager {
 
     private static File resolveSafeEntry(File root, String entryName) throws IOException {
         if (entryName == null || entryName.length() == 0 || entryName.startsWith("/")
-                || entryName.indexOf('\\\\') >= 0) {
+                || entryName.indexOf('\\') >= 0) {
             throw new IOException("Invalid backup path");
         }
         File result = new File(root, entryName);
