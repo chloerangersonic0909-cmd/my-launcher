@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import net.kdt.pojavlaunch.LauncherActivity;
+import net.kdt.pojavlaunch.fragments.OnlineModsFragment;
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
@@ -140,6 +141,8 @@ public class DownloadCenterFragment extends Fragment {
 
         addSection(root, "MOD CONTENT");
         addCard(root, "🧩  Mods (.jar)", "นำไฟล์ Mod JAR ไปไว้ในโฟลเดอร์ mods", v -> chooseFile(ImportType.MOD));
+        addCard(root, "🌐  ค้นหาและติดตั้ง Mods", "ค้นหาม็อดออนไลน์ เลือกเวอร์ชัน และติดตั้ง JAR ลงในโปรไฟล์ปัจจุบัน", v ->
+                Tools.swapFragment(requireActivity(), OnlineModsFragment.class, OnlineModsFragment.TAG, null));
         addCard(root, "✨  Shaders (.zip)", "นำ Shader Pack ไปไว้ในโฟลเดอร์ shaderpacks", v -> chooseFile(ImportType.SHADER));
         addCard(root, "🎨  Resource Packs (.zip)", "ตรวจ pack.mcmeta ก่อนติดตั้ง", v -> chooseFile(ImportType.RESOURCE_PACK));
         addSection(root, "GAME CONTENT");
