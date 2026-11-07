@@ -2,15 +2,15 @@
 <resources>
     <color name="control_button_color">#4CC4C4C4</color>
     <color name="control_button_pressed_color">#4D000000</color>
-    <color name="minebutton_color">#39FF14</color>
-    <color name="background_app">#FFFFFF</color>
-    <color name="divider">#E5E5E5</color>
-    <color name="background_overlay">#F8FFF7</color>
-    <color name="background_status_bar">#FFFFFF</color>
-    <color name="background_bottom_bar">#FFFFFF</color>
-    <color name="primary_text">#000000</color>
-    <color name="secondary_text">#303030</color>
-    <color name="colorAccent">#39FF14</color>
-    <color name="colorPrimary">#39FF14</color>
-    <color name="colorPrimaryDark">#20C900</color>
+    <color name="minebutton_color">#FFFFFF</color>
+    <color name="background_app">#030308</color>
+    <color name="divider">#383744</color>
+    <color name="background_overlay">#111018</color>
+    <color name="background_status_bar">#030308</color>
+    <color name="background_bottom_bar">#090910</color>
+    <color name="primary_text">#FFFFFF</color>
+    <color name="secondary_text">#B8B7C7</color>
+    <color name="colorAccent">#B8A7FF</color>
+    <color name="colorPrimary">#171522</color>
+    <color name="colorPrimaryDark">#030308</color>
 </resources>
