@@ -46,6 +46,7 @@ import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
 import net.kdt.pojavlaunch.modloaders.LWJGL3ifyUtils;
 import net.kdt.pojavlaunch.modloaders.modpacks.ModloaderInstallTracker;
 import net.kdt.pojavlaunch.modloaders.modpacks.api.CommonApi;
+import net.kdt.pojavlaunch.modloaders.modpacks.api.ModFileImporter;
 import net.kdt.pojavlaunch.modloaders.modpacks.api.ModLoader;
 import net.kdt.pojavlaunch.modloaders.modpacks.api.ModpackInstaller;
 import net.kdt.pojavlaunch.modloaders.modpacks.api.NotificationDownloadListener;
@@ -81,6 +82,24 @@ public class LauncherActivity extends BaseActivity {
             registerForActivityResult(new OpenDocumentWithExtension("jar"), (data)->{
                 if(data != null) Tools.launchModInstaller(this, data);
             });
+    public final ActivityResultLauncher<Object> modJarImportLauncher =
+            registerForActivityResult(new OpenDocumentWithExtension("jar"), data -> {
+                if (data == null) return;
+                final Context appContext = getApplicationContext();
+                PojavApplication.sExecutorService.execute(() -> {
+                    try {
+                        File installed = ModFileImporter.importJar(appContext, data);
+                        runOnUiThread(() -> Toast.makeText(appContext,
+                                "ติดตั้ง Mod แล้ว: " + installed.getName(), Toast.LENGTH_LONG).show());
+                    } catch (IOException error) {
+                        String detail = error.getMessage();
+                        runOnUiThread(() -> Toast.makeText(appContext,
+                                "นำเข้า Mod ไม่สำเร็จ: " + (detail == null ? "ไฟล์ไม่ถูกต้อง" : detail),
+                                Toast.LENGTH_LONG).show());
+                    }
+                });
+            });
+
     public final ActivityResultLauncher<Object> modpackImportLauncher =
             registerForActivityResult(new OpenDocumentWithExtension(new String[]{"zip", "mrpack"}), (data)->{
                 if(data != null) {
