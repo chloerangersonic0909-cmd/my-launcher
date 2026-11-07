@@ -2,6 +2,11 @@ package net.kdt.pojavlaunch.prefs.screens;
 
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +26,20 @@ import net.kdt.pojavlaunch.prefs.LauncherPreferences;
  */
 public class LauncherPreferenceFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private final ActivityResultLauncher<String> backgroundPicker =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+                if (uri == null || !isAdded()) return;
+                try {
+                    requireContext().getContentResolver().takePersistableUriPermission(
+                            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    requireContext().getSharedPreferences("mylauncher_customization", Activity.MODE_PRIVATE)
+                            .edit().putString("background_uri", uri.toString()).apply();
+                    Toast.makeText(requireContext(), "บันทึกภาพพื้นหลังแล้ว", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(requireContext(), "ไม่สามารถใช้ภาพนี้ได้", Toast.LENGTH_LONG).show();
+                }
+            });
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         view.setBackgroundColor(getResources().getColor(R.color.background_app));
@@ -31,6 +50,22 @@ public class LauncherPreferenceFragment extends PreferenceFragmentCompat impleme
     public void onCreatePreferences(Bundle b, String str) {
         addPreferencesFromResource(R.xml.pref_main);
         setupNotificationRequestPreference();
+        Preference chooseBackground = findPreference("background_image_pick");
+        if (chooseBackground != null) {
+            chooseBackground.setOnPreferenceClickListener(preference -> {
+                backgroundPicker.launch(new String[]{"image/*"});
+                return true;
+            });
+        }
+        Preference resetBackground = findPreference("background_image_reset");
+        if (resetBackground != null) {
+            resetBackground.setOnPreferenceClickListener(preference -> {
+                requireContext().getSharedPreferences("mylauncher_customization", Activity.MODE_PRIVATE)
+                        .edit().remove("background_uri").apply();
+                Toast.makeText(requireContext(), "คืนค่าพื้นหลังเริ่มต้นแล้ว", Toast.LENGTH_SHORT).show();
+                return true;
+            });
+        }
     }
 
     private void setupNotificationRequestPreference() {
