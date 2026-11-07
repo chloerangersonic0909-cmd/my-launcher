@@ -33,7 +33,7 @@ jobs:
           import json, os, re, urllib.error, urllib.parse, urllib.request
           webhook_url = os.environ["DISCORD_WEBHOOK_URL"].strip()
           parsed = urllib.parse.urlsplit(webhook_url)
-          if parsed.scheme != "https" or parsed.hostname not in ("discord.com", "discordapp.com") or not re.fullmatch(r"/api/webhooks/\\d+/[A-Za-z0-9._-]+/?", parsed.path):
+          if parsed.scheme != "https" or parsed.hostname not in ("discord.com", "discordapp.com") or not re.fullmatch(r"/api/webhooks/[0-9]+/[A-Za-z0-9._-]+/?", parsed.path):
               raise SystemExit("DISCORD_WEBHOOK_URL format is invalid. Copy the full Webhook URL from Discord Integrations.")
           payload = {
               "username": "My Launcher Test",
