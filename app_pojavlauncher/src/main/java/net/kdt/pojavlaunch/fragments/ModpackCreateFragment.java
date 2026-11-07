@@ -40,7 +40,7 @@ public class ModpackCreateFragment extends Fragment {
     private String pendingExportName = "My Launcher Modpack";
 
     private final ActivityResultLauncher<String> exportModpackLauncher =
-            registerForActivityResult(new ActivityResultContracts.CreateDocument("application/x-modrinth-modpack"), uri -> {
+            registerForActivityResult(new ActivityResultContracts.CreateDocument(), uri -> {
                 if (uri == null || !isAdded()) return;
                 if (ProgressLayout.hasProcesses()) {
                     Toast.makeText(requireContext(), R.string.tasks_ongoing, Toast.LENGTH_LONG).show();
