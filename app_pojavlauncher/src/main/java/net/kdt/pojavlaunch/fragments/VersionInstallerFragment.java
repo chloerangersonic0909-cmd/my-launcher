@@ -106,14 +106,24 @@ public class VersionInstallerFragment extends Fragment {
 
     private void loadVersions() {
         new AsyncVersionList().getVersionList(result -> {
+            // AsyncVersionList invokes its listener on a worker thread.
+            // All Fragment state and View operations must run on the main thread.
             if (!isAdded()) return;
-            versions.clear();
-            if (result != null && result.versions != null) {
-                for (JMinecraftVersionList.Version version : result.versions) {
-                    if (version != null && version.id != null) versions.add(version);
+            requireActivity().runOnUiThread(() -> {
+                if (!isAdded() || getView() == null || list == null || status == null) return;
+                versions.clear();
+                if (result != null && result.versions != null) {
+                    for (JMinecraftVersionList.Version version : result.versions) {
+                        if (version != null && version.id != null) versions.add(version);
+                    }
                 }
-            }
-            renderVersions();
+                if (result == null || result.versions == null) {
+                    status.setText("Unable to load versions. Check your connection and try again.");
+                    list.removeAllViews();
+                    return;
+                }
+                renderVersions();
+            });
         }, false);
     }
 
