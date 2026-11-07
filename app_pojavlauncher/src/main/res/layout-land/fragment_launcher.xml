@@ -30,14 +30,15 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <ImageButton
+        <com.kdt.mcgui.LauncherMenuButton
             android:id="@+id/open_files_button"
+            style="@style/LauncherMenuButton.Universal"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:drawableStart="@drawable/ic_folder"
             android:contentDescription="@string/mcl_button_open_directory"
-            android:src="@drawable/ic_folder"
-            android:tint="#D6D4DD" />
+            android:text="" />
 
         <ImageButton
             android:id="@+id/edit_profile_button"
@@ -48,14 +49,15 @@
             android:src="@drawable/ic_edit_profile"
             android:tint="#D6D4DD" />
 
-        <ImageButton
+        <com.kdt.mcgui.LauncherMenuButton
             android:id="@+id/download_center_button"
+            style="@style/LauncherMenuButton.Universal"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:drawableStart="@android:drawable/stat_sys_download"
             android:contentDescription="@string/mylauncher_download_center"
-            android:src="@drawable/ic_download"
-            android:tint="#D6D4DD" />
+            android:text="" />
 
         <ImageButton
             android:id="@+id/mylauncher_settings_button"
@@ -63,7 +65,7 @@
             android:layout_height="48dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/preference_settings"
-            android:src="@drawable/ic_settings"
+            android:src="@android:drawable/ic_menu_preferences"
             android:tint="#D6D4DD" />
     </LinearLayout>
 
