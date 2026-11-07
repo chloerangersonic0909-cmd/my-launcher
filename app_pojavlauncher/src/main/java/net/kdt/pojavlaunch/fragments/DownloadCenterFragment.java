@@ -274,8 +274,11 @@ public class DownloadCenterFragment extends Fragment {
                 filters.name = query;
                 filters.mcVersion = targetVersion;
                 SearchResult result = modpackApi.searchMod(filters);
-                if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> renderModpackResults(result, targetVersion));
+                Activity activity = getActivity();
+                if (activity == null || !isAdded()) return;
+                activity.runOnUiThread(() -> {
+                    if (isAdded() && getView() != null) renderModpackResults(result, targetVersion);
+                });
             } catch (Exception e) {
                 postStatus("ค้นหาไม่สำเร็จ: " + e.getMessage(), 0, false);
             }
@@ -335,26 +338,32 @@ public class DownloadCenterFragment extends Fragment {
                 java.util.ArrayList<Integer> compatible = new java.util.ArrayList<>();
                 java.util.ArrayList<String> labels = new java.util.ArrayList<>();
                 for (int i = 0; i < detail.versionNames.length; i++) {
-                    String mc = detail.mcVersionNames[i];
+                    String mc = detail.mcVersionNames != null && i < detail.mcVersionNames.length
+                            ? detail.mcVersionNames[i] : null;
                     if (targetVersion == null || targetVersion.equals(mc)) {
                         compatible.add(i);
-                        labels.add(detail.versionNames[i] + "  •  Minecraft " + mc);
+                        labels.add(detail.versionNames[i] + "  •  Minecraft " + (mc == null ? "ไม่ระบุ" : mc));
                     }
                 }
                 if (compatible.isEmpty()) {
                     postStatus("ไม่พบเวอร์ชันที่ตรงกับ Minecraft " + targetVersion, 0, false);
                     return;
                 }
-                if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> new AlertDialog.Builder(requireContext())
-                        .setTitle("เลือกเวอร์ชัน • " + item.title)
-                        .setItems(labels.toArray(new String[0]), (dialog, which) -> {
-                            int selectedIndex = compatible.get(which);
-                            setStatus("กำลังติดตั้ง " + item.title + "… ดูความคืบหน้าได้จากแถบงานและการแจ้งเตือน", 0, true);
-                            modpackApi.handleInstallation(requireContext(), detail, selectedIndex);
-                        })
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show());
+                Activity activity = getActivity();
+                if (activity == null || !isAdded()) return;
+                activity.runOnUiThread(() -> {
+                    if (!isAdded() || getContext() == null) return;
+                    new AlertDialog.Builder(activity)
+                            .setTitle("เลือกเวอร์ชัน • " + item.title)
+                            .setItems(labels.toArray(new String[0]), (dialog, which) -> {
+                                if (!isAdded() || getContext() == null) return;
+                                int selectedIndex = compatible.get(which);
+                                setStatus("กำลังติดตั้ง " + item.title + "… ดูความคืบหน้าได้จากแถบงานและการแจ้งเตือน", 0, true);
+                                modpackApi.handleInstallation(activity, detail, selectedIndex);
+                            })
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show();
+                });
             } catch (Exception e) {
                 postStatus("อ่านรายละเอียด Modpack ไม่สำเร็จ: " + e.getMessage(), 0, false);
             }
