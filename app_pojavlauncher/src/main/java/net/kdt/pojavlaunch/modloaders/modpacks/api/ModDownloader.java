@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CallerRunsPolicy;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ModDownloader {
     private static final ThreadLocal<byte[]> sThreadLocalBuffer = new ThreadLocal<>();
     private final ThreadPoolExecutor mDownloadPool = new ThreadPoolExecutor(3, 3, 100, TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(128), new CallerRunsPolicy());
+            new ArrayBlockingQueue<>(128), new ThreadPoolExecutor.CallerRunsPolicy());
     private final AtomicBoolean mTerminator = new AtomicBoolean(false);
     private final AtomicLong mDownloadSize = new AtomicLong(0);
     private final Object mExceptionSyncPoint = new Object();
