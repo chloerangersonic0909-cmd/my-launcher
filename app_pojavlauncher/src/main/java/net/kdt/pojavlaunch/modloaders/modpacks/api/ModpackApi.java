@@ -19,6 +19,7 @@ import net.kdt.pojavlaunch.modloaders.modpacks.models.Constants;
 import java.io.IOException;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.Future;
 
 
 /**
@@ -53,11 +54,11 @@ public interface ModpackApi {
      * @param modDetail The mod detail data
      * @param selectedVersion The selected version
      */
-    default void handleInstallation(Context context, ModDetail modDetail, int selectedVersion) {
+    default Future<?> handleInstallation(Context context, ModDetail modDetail, int selectedVersion) {
         // Doing this here since when starting installation, the progress does not start immediately
         // which may lead to two concurrent installations (very bad)
         ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, 0, R.string.global_waiting);
-        PojavApplication.sExecutorService.execute(() -> {
+        return PojavApplication.sExecutorService.submit(() -> {
             try {
                 ModLoader loaderInfo = installMod(modDetail, selectedVersion);
                 if (loaderInfo == null) {
