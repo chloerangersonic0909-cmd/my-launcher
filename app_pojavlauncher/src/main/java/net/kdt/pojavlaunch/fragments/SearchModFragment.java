@@ -70,9 +70,10 @@ public class SearchModFragment extends Fragment implements ModItemAdapter.Search
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        modpackApi = mIsModpack
-                ? new CommonApi(context.getString(R.string.curseforge_api_key))
-                : new ModrinthApi();
+        // Use the combined provider for both mods and modpacks.
+        // This merges Modrinth and CurseForge results while preserving each
+        // result's source so details and downloads are routed to the correct API.
+        modpackApi = new CommonApi(context.getString(R.string.curseforge_api_key));
     }
 
     @Override
