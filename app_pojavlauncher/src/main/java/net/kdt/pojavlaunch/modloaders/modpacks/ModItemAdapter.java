@@ -71,6 +71,20 @@ public class ModItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mSearchResultCallback = callback;
     }
 
+    /** Cancel network and detail requests when the owning screen is destroyed. */
+    public void cancelPendingTasks() {
+        if (mTaskInProgress != null) {
+            mTaskInProgress.cancel(true);
+            mTaskInProgress = null;
+        }
+        for (ViewHolder holder : mViewHolderSet) {
+            if (holder.mExtensionFuture != null) {
+                holder.mExtensionFuture.cancel(true);
+                holder.mExtensionFuture = null;
+            }
+        }
+    }
+
     public void performSearchQuery(SearchFilters searchFilters) {
         if(mTaskInProgress != null) {
             mTaskInProgress.cancel(true);
