@@ -64,7 +64,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/preference_settings"
+            android:contentDescription="Settings"
             android:src="@android:drawable/ic_menu_preferences"
             android:tint="#D6D4DD" />
     </LinearLayout>
