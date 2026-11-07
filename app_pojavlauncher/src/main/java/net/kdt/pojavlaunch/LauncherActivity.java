@@ -394,6 +394,8 @@ public class LauncherActivity extends BaseActivity {
         );
         getWindow().setBackgroundDrawable(null);
         bindViews();
+        // Check GitHub Releases after the launcher UI has settled.
+        mFragmentView.postDelayed(() -> MyLauncherUpdater.checkForUpdates(this), 2500);
         checkNotificationPermission();
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         ProgressKeeper.addTaskCountListener(mDoubleLaunchPreventionListener);
