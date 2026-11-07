@@ -179,7 +179,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="8dp"
-                android:text="TOOLS & COMMUNITY"
+                android:text="TOOLS &amp; COMMUNITY"
                 android:textColor="#111111"
                 android:textSize="11sp"
                 android:textStyle="bold"
