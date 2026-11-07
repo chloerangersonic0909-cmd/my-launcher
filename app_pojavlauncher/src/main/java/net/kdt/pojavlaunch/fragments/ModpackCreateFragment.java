@@ -1,5 +1,7 @@
 package net.kdt.pojavlaunch.fragments;
 
+import android.app.Activity;
+
 import static net.kdt.pojavlaunch.Tools.hasNoOnlineProfileDialog;
 import static net.kdt.pojavlaunch.Tools.hasOnlineProfile;
 
