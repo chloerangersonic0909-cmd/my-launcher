@@ -55,16 +55,20 @@ public final class MyLauncherUpdater {
 
                 JSONArray assets = release.optJSONArray("assets");
                 if (assets == null) throw new IllegalStateException("Release has no APK assets");
+                String wantedAsset = appContext.getPackageName().endsWith(".debug")
+                        ? "app-debug.apk" : "app-release.apk";
                 JSONObject apkAsset = null;
                 for (int i = 0; i < assets.length(); i++) {
                     JSONObject asset = assets.getJSONObject(i);
-                    String name = asset.optString("name", "").toLowerCase(Locale.ROOT);
-                    if (name.endsWith(".apk") && !name.contains("symbols")) {
+                    if (wantedAsset.equalsIgnoreCase(asset.optString("name", ""))) {
                         apkAsset = asset;
                         break;
                     }
                 }
-                if (apkAsset == null) throw new IllegalStateException("No APK found in this GitHub Release");
+                if (apkAsset == null) {
+                    throw new IllegalStateException("This GitHub Release has no APK for package "
+                            + appContext.getPackageName());
+                }
 
                 JSONObject selectedAsset = apkAsset;
                 String notes = release.optString("body", "").trim();
