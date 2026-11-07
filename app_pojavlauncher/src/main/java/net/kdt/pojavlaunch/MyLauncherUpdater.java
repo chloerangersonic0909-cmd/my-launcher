@@ -130,7 +130,6 @@ public final class MyLauncherUpdater {
 
     private static void downloadAndInstall(android.app.Activity activity, JSONObject asset) {
         String downloadUrl = asset.optString("browser_download_url", "");
-        String fileName = asset.optString("name", "MyLauncher-update.apk");
         String digest = asset.optString("digest", "");
         if (!downloadUrl.startsWith("https://github.com/")) {
             new AlertDialog.Builder(activity).setTitle("ลิงก์ดาวน์โหลดไม่ปลอดภัย")
@@ -204,6 +203,14 @@ public final class MyLauncherUpdater {
                 if (archive == null) throw new SecurityException("Downloaded file is not a valid APK");
                 if (!activity.getPackageName().equals(archive.packageName)) {
                     throw new SecurityException("APK package name does not match this installation");
+                }
+                PackageInfo installed = pm.getPackageInfo(activity.getPackageName(), 0);
+                long installedCode = Build.VERSION.SDK_INT >= 28
+                        ? installed.getLongVersionCode() : installed.versionCode;
+                long downloadedCode = Build.VERSION.SDK_INT >= 28
+                        ? archive.getLongVersionCode() : archive.versionCode;
+                if (downloadedCode <= installedCode) {
+                    throw new SecurityException("APK versionCode is not newer than the installed app");
                 }
 
                 File finalApk = apk;
