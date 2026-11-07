@@ -63,6 +63,66 @@ public class AsyncAssetManager {
         });
     }
 
+    /**
+     * Prepare bundled launcher components before the first account sign-in.
+     * The callback is invoked from the worker thread; callers must switch to the UI thread.
+     */
+    public interface FirstRunSetupListener {
+        void onStep(String message, int progress);
+        void onComplete(IOException error);
+    }
+
+    public static void prepareFirstRun(Context ctx, FirstRunSetupListener listener) {
+        sExecutorService.execute(() -> {
+            try {
+                AssetManager am = ctx.getAssets();
+                listener.onStep("กำลังเตรียมไฟล์ตั้งต้น", 5);
+                Tools.copyAssetFile(ctx, "options.txt", Tools.DIR_GAME_NEW, false);
+                try (InputStream is = am.open("default.json")) {
+                    String assetSha1 = new String(org.apache.commons.codec.binary.Hex.encodeHex(
+                            org.apache.commons.codec.digest.DigestUtils.sha1(is)));
+                    if (!Tools.compareSHA1(new File(Tools.CTRLDEF_FILE), assetSha1)) {
+                        Tools.copyAssetFile(ctx, "default.json", Tools.CTRLMAP_PATH, "new_default.json", false);
+                    } else if (!new File(Tools.CTRLMAP_PATH + "/new_default.json").exists()) {
+                        Tools.copyAssetFile(ctx, "default.json", Tools.CTRLMAP_PATH, false);
+                    }
+                }
+                Tools.copyAssetFile(ctx, "launcher_profiles.json", Tools.DIR_GAME_NEW, false);
+                Tools.copyAssetFile(ctx, "resolv.conf", Tools.DIR_DATA, false);
+
+                listener.onStep("กำลังติดตั้งส่วนประกอบกราฟิกและ Java", 25);
+                unpackComponent(ctx, "caciocavallo", false);
+                unpackComponent(ctx, "caciocavallo17", false);
+
+                listener.onStep("กำลังเตรียมไลบรารีเกม", 50);
+                unpackLwjglNatives(ctx);
+                unpackComponent(ctx, "lwjgl3/3.3.3", false);
+                unpackComponent(ctx, "lwjgl3/3.4.1", false);
+
+                listener.onStep("กำลังติดตั้งส่วนเสริมความปลอดภัยและตัวติดตั้ง", 75);
+                unpackComponent(ctx, "security", true);
+                unpackComponent(ctx, "arc_dns_injector", true);
+                unpackComponent(ctx, "MioLibPatcher", true);
+                unpackComponent(ctx, "forge_installer", true);
+
+                listener.onStep("กำลังตรวจสอบไฟล์ที่ติดตั้ง", 95);
+                File lwjglMerged = new File(Tools.DIR_GAME_HOME + "/lwjgl3/3.3.3/lwjgl-3.3.3-merged-modules.jar");
+                File cacio = new File(Tools.DIR_GAME_HOME + "/caciocavallo17");
+                if (!lwjglMerged.isFile() || !cacio.isDirectory()) {
+                    throw new IOException("Required launcher components are missing after setup.");
+                }
+                listener.onStep("เตรียมระบบเสร็จแล้ว", 100);
+                listener.onComplete(null);
+            } catch (IOException e) {
+                Log.e("FirstRunSetup", "Initial component setup failed", e);
+                listener.onComplete(e);
+            } catch (Exception e) {
+                Log.e("FirstRunSetup", "Unexpected initial setup error", e);
+                listener.onComplete(new IOException(e));
+            }
+        });
+    }
+
     /** Unpack single files, with no regard to version tracking */
     public static void unpackSingleFiles(Context ctx){
         ProgressLayout.setProgress(ProgressLayout.EXTRACT_SINGLE_FILES, 0);
