@@ -536,4 +536,6 @@
     <string name="mylauncher_platform">Minecraft • Android</string>
     <string name="mylauncher_system_status">SYSTEM STATUS</string>
     <string name="mylauncher_quick_access_desc">Manage versions, mods, shaders, resource packs and worlds in Download Center.</string>
+    <string name="mylauncher_add_account">Add Account</string>
+    <string name="mylauncher_no_installed_versions_hint">No installed versions</string>
 </resources>
