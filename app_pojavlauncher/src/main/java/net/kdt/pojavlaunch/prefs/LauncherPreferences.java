@@ -43,6 +43,7 @@ public class LauncherPreferences {
     public static boolean PREF_DISABLE_SWAP_HAND = false;
     public static float PREF_MOUSESPEED = 1f;
     public static int PREF_RAM_ALLOCATION;
+    public static boolean PREF_AUTO_RAM_ALLOCATION = true;
     public static String PREF_DEFAULT_RUNTIME;
     public static boolean PREF_SUSTAINED_PERFORMANCE = false;
     public static boolean PREF_VIRTUAL_MOUSE_START = false;
@@ -91,6 +92,7 @@ public class LauncherPreferences {
         PREF_DISABLE_GESTURES = DEFAULT_PREF.getBoolean("disableGestures",false);
         PREF_GAMEPAD_FORCEDSDL_PASSTHRU = DEFAULT_PREF.getBoolean("gamepadPassthruForced",false);
         PREF_DISABLE_SWAP_HAND = DEFAULT_PREF.getBoolean("disableDoubleTap", false);
+        PREF_AUTO_RAM_ALLOCATION = DEFAULT_PREF.getBoolean("auto_ram_allocation", true);
         PREF_RAM_ALLOCATION = DEFAULT_PREF.getInt("allocation", findBestRAMAllocation(ctx));
         PREF_CUSTOM_JAVA_ARGS = DEFAULT_PREF.getString("javaArgs", "");
         PREF_SUSTAINED_PERFORMANCE = DEFAULT_PREF.getBoolean("sustainedPerformance", isDevicePowerful);
@@ -164,6 +166,35 @@ public class LauncherPreferences {
         if (deviceRam < 4096) return 1144;
         if (deviceRam < 6144) return 1536;
         return 2048; //Default RAM allocation for 64 bits
+    }
+
+    /**
+     * Select a conservative heap size using the device's reported physical and currently
+     * available memory. The available-memory limit is recalculated immediately before launch.
+     */
+    public static int getRecommendedRAMAllocation(Context ctx) {
+        int totalMb = Math.max(512, Tools.getTotalDeviceMemory(ctx));
+        int availableMb = Math.max(0, Tools.getFreeDeviceMemory(ctx));
+
+        int physicalLimit;
+        if (totalMb < 1536) physicalLimit = 320;
+        else if (totalMb < 2048) physicalLimit = 448;
+        else if (totalMb < 3072) physicalLimit = 640;
+        else if (totalMb < 4096) physicalLimit = 768;
+        else if (totalMb < 6144) physicalLimit = 1280;
+        else if (totalMb < 8192) physicalLimit = 1792;
+        else if (totalMb < 12288) physicalLimit = 2304;
+        else physicalLimit = 3072;
+
+        if (is32BitsDevice()) physicalLimit = Math.min(physicalLimit, 768);
+
+        int systemReserveMb = totalMb < 3072 ? 640 : (totalMb < 6144 ? 896 : 1280);
+        int availableLimit = Math.max(256, availableMb - systemReserveMb);
+        int recommended = Math.min(physicalLimit, availableLimit);
+
+        // Keep allocations aligned to 64 MB to avoid awkward heap sizes.
+        recommended = (recommended / 64) * 64;
+        return Math.max(256, recommended);
     }
 
     /// Find a correct resolution for the device
