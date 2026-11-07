@@ -490,4 +490,6 @@
     <string name="mylauncher_platform">Minecraft • Android</string>
     <string name="mylauncher_system_status">СОСТОЯНИЕ СИСТЕМЫ</string>
     <string name="mylauncher_quick_access_desc">Управляйте версиями, модами, шейдерами, наборами ресурсов и мирами в центре загрузок.</string>
+    <string name="mylauncher_add_account">Добавить аккаунт</string>
+    <string name="mylauncher_no_installed_versions_hint">Нет установленных версий</string>
 </resources>
