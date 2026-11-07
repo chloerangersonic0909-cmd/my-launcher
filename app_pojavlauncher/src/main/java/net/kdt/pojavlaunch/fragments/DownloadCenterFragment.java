@@ -67,6 +67,12 @@ public class DownloadCenterFragment extends Fragment {
     private volatile boolean importing;
     private volatile Thread importThread;
     private Context appContext;
+    private AlertDialog modpackInstallDialog;
+    private TextView installStageText;
+    private ProgressBar installProgressBar;
+    private TextView installPercentText;
+    private Future<?> modpackInstallFuture;
+    private ProgressListener modpackProgressListener;
 
     private final ActivityResultLauncher<String[]> filePicker =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::onFileSelected);
@@ -358,8 +364,8 @@ public class DownloadCenterFragment extends Fragment {
                             .setItems(labels.toArray(new String[0]), (dialog, which) -> {
                                 if (!isAdded() || getContext() == null) return;
                                 int selectedIndex = compatible.get(which);
-                                setStatus("กำลังติดตั้ง " + item.title + "… ดูความคืบหน้าได้จากแถบงานและการแจ้งเตือน", 0, true);
-                                modpackApi.handleInstallation(activity, detail, selectedIndex);
+                                showModpackInstallDialog(item.title);
+                                modpackInstallFuture = modpackApi.handleInstallation(activity, detail, selectedIndex);
                             })
                             .setNegativeButton(android.R.string.cancel, null)
                             .show();
@@ -368,6 +374,127 @@ public class DownloadCenterFragment extends Fragment {
                 postStatus("อ่านรายละเอียด Modpack ไม่สำเร็จ: " + e.getMessage(), 0, false);
             }
         });
+    }
+
+
+    /**
+     * Shows live installation progress from the launcher's real ProgressKeeper events.
+     * No synthetic percentages or download speeds are displayed.
+     */
+    private void showModpackInstallDialog(String modpackName) {
+        Activity activity = getActivity();
+        if (activity == null || !isAdded()) return;
+
+        LinearLayout content = new LinearLayout(activity);
+        content.setOrientation(LinearLayout.VERTICAL);
+        int pad = dp(18);
+        content.setPadding(pad, dp(8), pad, dp(12));
+
+        TextView title = new TextView(activity);
+        title.setText("กำลังติดตั้ง " + modpackName);
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(18);
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        content.addView(title, matchWrap());
+
+        installStageText = new TextView(activity);
+        installStageText.setText("กำลังเตรียมการติดตั้ง…");
+        installStageText.setTextColor(Color.rgb(205, 215, 228));
+        installStageText.setTextSize(13);
+        LinearLayout.LayoutParams stageParams = matchWrap();
+        stageParams.topMargin = dp(18);
+        content.addView(installStageText, stageParams);
+
+        installProgressBar = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
+        installProgressBar.setMax(100);
+        installProgressBar.setIndeterminate(true);
+        LinearLayout.LayoutParams barParams = matchWrap();
+        barParams.topMargin = dp(10);
+        content.addView(installProgressBar, barParams);
+
+        installPercentText = new TextView(activity);
+        installPercentText.setText("กำลังเริ่ม…");
+        installPercentText.setTextColor(Color.rgb(100, 230, 125));
+        installPercentText.setTextSize(12);
+        LinearLayout.LayoutParams percentParams = matchWrap();
+        percentParams.topMargin = dp(6);
+        content.addView(installPercentText, percentParams);
+
+        AlertDialog dialog = new AlertDialog.Builder(activity)
+                .setView(content)
+                .setNegativeButton("ยกเลิก", null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setOnClickListener(v -> cancelModpackInstallation()));
+        dialog.setOnCancelListener(ignored -> cancelModpackInstallation());
+        modpackInstallDialog = dialog;
+        dialog.show();
+
+        modpackProgressListener = new ProgressListener() {
+            @Override public void onProgressStarted() {
+                activity.runOnUiThread(() -> {
+                    if (installStageText != null) installStageText.setText("เริ่มติดตั้ง Modpack");
+                });
+            }
+
+            @Override public void onProgressUpdated(int progress, int resid, Object... args) {
+                String message = "กำลังดำเนินการติดตั้ง…";
+                try {
+                    if (resid != -1) message = activity.getString(resid, args);
+                    else if (args != null && args.length > 0 && args[0] != null) message = String.valueOf(args[0]);
+                } catch (Exception ignored) { }
+                final String displayMessage = message;
+                activity.runOnUiThread(() -> {
+                    if (installStageText == null || modpackInstallDialog == null || !modpackInstallDialog.isShowing()) return;
+                    installStageText.setText(displayMessage);
+                    if (progress >= 0) {
+                        installProgressBar.setIndeterminate(false);
+                        installProgressBar.setProgress(Math.min(100, progress));
+                        installPercentText.setText(Math.min(100, progress) + "%");
+                    } else {
+                        installProgressBar.setIndeterminate(true);
+                        installPercentText.setText("กำลังดำเนินการ…");
+                    }
+                });
+            }
+
+            @Override public void onProgressEnded() {
+                activity.runOnUiThread(() -> {
+                    if (installStageText != null) installStageText.setText("เสร็จสิ้นขั้นตอนติดตั้ง");
+                    if (installProgressBar != null) {
+                        installProgressBar.setIndeterminate(false);
+                        installProgressBar.setProgress(100);
+                    }
+                    if (installPercentText != null) installPercentText.setText("100%");
+                    if (modpackInstallDialog != null && modpackInstallDialog.isShowing()) {
+                        modpackInstallDialog.dismiss();
+                    }
+                    clearModpackProgressListener();
+                });
+            }
+        };
+        ProgressKeeper.addListener(ProgressLayout.INSTALL_MODPACK, modpackProgressListener);
+    }
+
+    private void cancelModpackInstallation() {
+        Future<?> task = modpackInstallFuture;
+        if (task != null) task.cancel(true);
+        ProgressLayout.clearProgress(ProgressLayout.INSTALL_MODPACK);
+        modpackInstallFuture = null;
+        clearModpackProgressListener();
+        if (modpackInstallDialog != null && modpackInstallDialog.isShowing()) modpackInstallDialog.dismiss();
+        modpackInstallDialog = null;
+        installStageText = null;
+        installProgressBar = null;
+        installPercentText = null;
+        setStatus("ยกเลิกคำสั่งติดตั้ง Modpack แล้ว", 0, false);
+    }
+
+    private void clearModpackProgressListener() {
+        if (modpackProgressListener != null) {
+            ProgressKeeper.removeListener(ProgressLayout.INSTALL_MODPACK, modpackProgressListener);
+            modpackProgressListener = null;
+        }
     }
 
     private void chooseFile(ImportType type) {
