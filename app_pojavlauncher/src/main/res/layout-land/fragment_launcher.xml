@@ -195,47 +195,11 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/background_status_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:padding="12dp"
-            android:background="#29282E"
-            android:text="@string/mylauncher_game_not_running"
-            android:textColor="#D8D6DE"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:id="@+id/background_actions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <Button
-                android:id="@+id/background_permission_button"
-                android:layout_width="0dp"
-                android:layout_height="38dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:text="@string/mylauncher_enable_notifications"
-                android:textSize="10sp" />
-            <Button
-                android:id="@+id/stop_game_button"
-                android:layout_width="0dp"
-                android:layout_height="38dp"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/mylauncher_stop_game"
-                android:textSize="10sp" />
-        </LinearLayout>
-
         <com.kdt.mcgui.mcVersionSpinner
             android:id="@+id/mc_version_spinner"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="8dp"
             android:background="#29282E"
             android:drawableEnd="@drawable/spinner_arrow"
             android:paddingStart="10dp"
@@ -259,7 +223,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:gravity="center"
             android:text="@string/mylauncher_no_installed_versions_hint"
             android:textColor="#A8A6B0"
