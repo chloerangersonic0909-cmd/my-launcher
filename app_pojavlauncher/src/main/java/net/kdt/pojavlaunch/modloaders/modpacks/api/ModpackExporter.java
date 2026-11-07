@@ -85,6 +85,9 @@ public final class ModpackExporter {
         File[] children = current.listFiles();
         if (children == null) throw new IOException("Unable to read instance folder: " + current.getName());
         for (File child : children) {
+            String rootPath = root.getCanonicalPath() + File.separator;
+            String childPath = child.getCanonicalPath();
+            if (!childPath.startsWith(rootPath)) throw new IOException("Unsafe file in instance folder");
             if (child.isDirectory()) {
                 addDirectory(zip, root, child, prefix, counter);
                 continue;
@@ -93,9 +96,6 @@ public final class ModpackExporter {
             String name = child.getName().toLowerCase(Locale.ROOT);
             if (root.getName().equals("mods") && !name.endsWith(".jar")) continue;
 
-            String rootPath = root.getCanonicalPath() + File.separator;
-            String childPath = child.getCanonicalPath();
-            if (!childPath.startsWith(rootPath)) throw new IOException("Unsafe file in instance folder");
             String relative = childPath.substring(rootPath.length()).replace(File.separatorChar, '/');
             if (relative.isEmpty() || relative.startsWith("/") || relative.contains("../")) {
                 throw new IOException("Invalid instance file path");
