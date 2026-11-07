@@ -10,6 +10,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
+import androidx.appcompat.app.AlertDialog;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -161,7 +163,7 @@ public class VersionInstallerFragment extends Fragment {
             install.setPadding(dp(12), dp(9), dp(12), dp(9));
             install.setBackground(panel("#49376B", "#8B6AC5"));
             card.addView(install);
-            card.setOnClickListener(v -> openProfileForVersion(version.id));
+            card.setOnClickListener(v -> showInstallConfirmation(version));
             LinearLayout.LayoutParams cardParams = match(); cardParams.bottomMargin = dp(8);
             list.addView(card, cardParams);
         }
@@ -171,6 +173,99 @@ public class VersionInstallerFragment extends Fragment {
     private String labelFor(String type) {
         for (int i = 0; i < FILTERS.length; i++) if (FILTERS[i].equals(type)) return LABELS[i];
         return "Minecraft";
+    }
+
+    private void showInstallConfirmation(JMinecraftVersionList.Version version) {
+        if (!isAdded() || version == null) return;
+        ScrollView detailsScroll = new ScrollView(requireContext());
+        LinearLayout content = new LinearLayout(requireContext());
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(20), dp(12), dp(20), dp(8));
+        detailsScroll.addView(content);
+
+        ImageView minecraftImage = new ImageView(requireContext());
+        minecraftImage.setImageResource(R.mipmap.ic_launcher_round);
+        minecraftImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(dp(104), dp(104));
+        imageParams.gravity = Gravity.CENTER_HORIZONTAL;
+        imageParams.bottomMargin = dp(12);
+        content.addView(minecraftImage, imageParams);
+
+        TextView heading = text("Minecraft Java Edition", 18, Color.WHITE, true);
+        heading.setGravity(Gravity.CENTER);
+        content.addView(heading, match());
+        TextView versionName = text(version.id, 16, Color.rgb(190, 160, 255), true);
+        versionName.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams versionParams = match();
+        versionParams.topMargin = dp(5);
+        versionParams.bottomMargin = dp(16);
+        content.addView(versionName, versionParams);
+
+        addDetailRow(content, "ประเภทเวอร์ชัน", labelFor(version.type));
+        addDetailRow(content, "รหัสเวอร์ชัน", version.id);
+        addDetailRow(content, "วันที่เผยแพร่", formatReleaseTime(version.releaseTime));
+        addDetailRow(content, "Java ที่ต้องใช้", version.javaVersion == null
+                ? "ไม่ได้ระบุ" : "Java " + version.javaVersion.majorVersion);
+        addDetailRow(content, "เวอร์ชัน Launcher ขั้นต่ำ", version.minimumLauncherVersion > 0
+                ? String.valueOf(version.minimumLauncherVersion) : "ไม่ได้ระบุ");
+        addDetailRow(content, "ขนาดไฟล์เกม", version.downloads != null && version.downloads.get("client") != null
+                ? formatBytes(version.downloads.get("client").size) : "ดูได้เมื่อดาวน์โหลด");
+        addDetailRow(content, "Asset Index", version.assetIndex == null ? "ไม่ได้ระบุ" : version.assetIndex.id);
+        addDetailRow(content, "Main Class", version.mainClass == null ? "ไม่ได้ระบุ" : version.mainClass);
+
+        TextView note = text("เมื่อกดยืนยัน ระบบจะเปิดหน้าตั้งค่าโปรไฟล์พร้อมเลือกเวอร์ชันนี้ไว้ให้ จากนั้นบันทึกโปรไฟล์เพื่อดำเนินการดาวน์โหลดและติดตั้งผ่านขั้นตอนของ Launcher",
+                12, Color.LTGRAY, false);
+        note.setLineSpacing(dp(3), 1f);
+        LinearLayout.LayoutParams noteParams = match();
+        noteParams.topMargin = dp(14);
+        content.addView(note, noteParams);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("ยืนยันการติดตั้ง")
+                .setView(detailsScroll)
+                .setNegativeButton("ยกเลิก", (d, which) -> d.dismiss())
+                .setPositiveButton("ดำเนินการติดตั้ง", (d, which) -> openProfileForVersion(version.id))
+                .create();
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.rgb(125, 92, 190));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.GRAY);
+        });
+        dialog.show();
+    }
+
+    private void addDetailRow(LinearLayout parent, String label, String value) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.VERTICAL);
+        row.setPadding(dp(11), dp(8), dp(11), dp(8));
+        row.setBackground(panel("#171722", "#343044"));
+        row.addView(text(label, 10, Color.LTGRAY, false), match());
+        TextView detail = text(value == null || value.trim().isEmpty() ? "ไม่ได้ระบุ" : value,
+                13, Color.WHITE, true);
+        LinearLayout.LayoutParams detailParams = match();
+        detailParams.topMargin = dp(3);
+        row.addView(detail, detailParams);
+        LinearLayout.LayoutParams rowParams = match();
+        rowParams.bottomMargin = dp(6);
+        parent.addView(row, rowParams);
+    }
+
+    private String formatReleaseTime(String value) {
+        if (value == null || value.trim().isEmpty()) return "ไม่ได้ระบุ";
+        try {
+            java.text.SimpleDateFormat input = new java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
+            java.util.Date date = input.parse(value);
+            if (date != null) return new java.text.SimpleDateFormat(
+                    "dd MMM yyyy, HH:mm", Locale.getDefault()).format(date);
+        } catch (Exception ignored) { }
+        return value;
+    }
+
+    private String formatBytes(long bytes) {
+        if (bytes <= 0) return "ไม่ทราบขนาด";
+        if (bytes >= 1024L * 1024L) return String.format(Locale.getDefault(),
+                "%.1f MB", bytes / (1024.0 * 1024.0));
+        return String.format(Locale.getDefault(), "%.0f KB", bytes / 1024.0);
     }
 
     private void openProfileForVersion(String version) {
