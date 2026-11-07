@@ -26,7 +26,7 @@ import net.kdt.pojavlaunch.prefs.LauncherPreferences;
  */
 public class LauncherPreferenceFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final ActivityResultLauncher<String> backgroundPicker =
+    private final ActivityResultLauncher<String[]> backgroundPicker =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
                 if (uri == null || !isAdded()) return;
                 try {
