@@ -102,10 +102,16 @@ public class ModrinthApi implements ModpackApi{
         String[] urls = new String[response.size()];
         String[] hashes = new String[response.size()];
         ModDetail.Dependencies[][] dependencies = new ModDetail.Dependencies[response.size()][];
+        String[][] loaders = new String[response.size()][];
 
         for (int i=0; i<response.size(); ++i) {
             JsonObject version = response.get(i).getAsJsonObject();
             names[i] = version.get("name").getAsString();
+            JsonArray loaderArray = version.getAsJsonArray("loaders");
+            if (loaderArray != null) {
+                loaders[i] = new String[loaderArray.size()];
+                for (int j = 0; j < loaderArray.size(); j++) loaders[i][j] = loaderArray.get(j).getAsString();
+            }
             ids[i] = version.get("id").getAsString();
             try {
                 JsonArray dependenciesJsonArray = version.getAsJsonArray("dependencies");
@@ -134,7 +140,9 @@ public class ModrinthApi implements ModpackApi{
             hashes[i] = hashesMap.get("sha1").getAsString();
         }
 
-        return new ModDetail(item, names, ids, mcNames, urls, hashes, dependencies);
+        ModDetail detail = new ModDetail(item, names, ids, mcNames, urls, hashes, dependencies);
+        detail.versionLoaders = loaders;
+        return detail;
     }
 
     private void fillInMissingModItemData(ModItem item) {
