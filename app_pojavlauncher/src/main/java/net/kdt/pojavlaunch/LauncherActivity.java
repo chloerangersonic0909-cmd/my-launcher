@@ -93,27 +93,36 @@ public class LauncherActivity extends BaseActivity {
                                     fileSize = returnCursor.getLong(0);
                                 }
                             }
-                            File modpackFile = new File(Tools.DIR_CACHE, "import_modpack_placeholdername.cf");
-                            try (InputStream inputStream = getContentResolver().openInputStream(data)){
-                                FileOutputStream output = new FileOutputStream(modpackFile);
-                                byte[] b = new byte[262144];
-                                int read;
-                                int readTotal = 0;
-                                while ((read = inputStream.read(b)) != -1) {
-                                    output.write(b, 0, read);
-                                    readTotal += read;
-                                    String readMB = fileSize > 0 ? String.format(Locale.US, "%.2f", readTotal / (1024.0 * 1024.0)) : "unknown";
-                                    String totalMB = fileSize > 0 ? String.format(Locale.US, "%.2f", fileSize / (1024.0 * 1024.0)) : "unknown";
-                                    int progress = fileSize > 0 ? (int) ((readTotal * 100L) / fileSize) : 0;
-                                    ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, progress, R.string.import_modpack_copy, readMB, totalMB);
+                            File modpackFile = new File(Tools.DIR_CACHE, "import_modpack_" + System.currentTimeMillis() + ".tmp");
+                            try {
+                                if (fileSize > 2L * 1024L * 1024L * 1024L) {
+                                    throw new IOException("Modpack file is larger than the 2 GB import limit");
                                 }
-                                output.flush();
-                                output.close();
+                                try (InputStream inputStream = getContentResolver().openInputStream(data);
+                                     FileOutputStream output = new FileOutputStream(modpackFile)) {
+                                    if (inputStream == null) throw new IOException("Unable to open selected modpack");
+                                    byte[] b = new byte[65536];
+                                    int read;
+                                    long readTotal = 0L;
+                                    while ((read = inputStream.read(b)) != -1) {
+                                        readTotal += read;
+                                        if (readTotal > 2L * 1024L * 1024L * 1024L) {
+                                            throw new IOException("Modpack file is larger than the 2 GB import limit");
+                                        }
+                                        output.write(b, 0, read);
+                                        String readMB = String.format(Locale.US, "%.2f", readTotal / (1024.0 * 1024.0));
+                                        String totalMB = fileSize > 0 ? String.format(Locale.US, "%.2f", fileSize / (1024.0 * 1024.0)) : "unknown";
+                                        int progress = fileSize > 0 ? (int) Math.min(100L, (readTotal * 100L) / fileSize) : 0;
+                                        ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, progress, R.string.import_modpack_copy, readMB, totalMB);
+                                    }
+                                    output.getFD().sync();
+                                }
+                                ModLoader loaderInfo = new CommonApi(getString(R.string.curseforge_api_key)).importModpack(modpackFile);
+                                if (loaderInfo == null) return;
+                                loaderInfo.getDownloadTask(new NotificationDownloadListener(this, loaderInfo)).run();
+                            } finally {
+                                if (modpackFile.exists()) modpackFile.delete();
                             }
-                            ModLoader loaderInfo = new CommonApi(getString(R.string.curseforge_api_key)).importModpack(modpackFile);
-                            modpackFile.delete();
-                            if (loaderInfo == null) return;
-                            loaderInfo.getDownloadTask(new NotificationDownloadListener(this, loaderInfo)).run();
                         } catch (IOException e) {
                             Tools.showErrorRemote(this, R.string.modpack_install_download_failed, e);
                             ProgressLayout.clearProgress(ProgressLayout.INSTALL_MODPACK);
