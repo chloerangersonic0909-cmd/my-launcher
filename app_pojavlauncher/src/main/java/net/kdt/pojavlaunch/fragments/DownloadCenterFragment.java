@@ -77,96 +77,159 @@ public class DownloadCenterFragment extends Fragment {
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = requireContext();
         appContext = context.getApplicationContext();
+
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(Color.rgb(244, 255, 241));
+        scroll.setBackgroundColor(Color.rgb(7, 10, 18));
 
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(18), dp(14), dp(18), dp(18));
+        root.setPadding(dp(16), dp(14), dp(16), dp(22));
         scroll.addView(root);
 
-        Button back = makeButton("←  กลับหน้าแรก", "#DFFFD8");
+        Button back = makeButton("‹  กลับหน้าแรก", "#172235");
         back.setOnClickListener(v -> Tools.backToMainMenu(requireActivity()));
         root.addView(back, matchWrap());
 
+        TextView eyebrow = new TextView(context);
+        eyebrow.setText("MY LAUNCHER  /  LIBRARY");
+        eyebrow.setTextColor(Color.rgb(91, 211, 238));
+        eyebrow.setTextSize(10);
+        eyebrow.setLetterSpacing(0.13f);
+        eyebrow.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        eyebrow.setPadding(0, dp(22), 0, dp(5));
+        root.addView(eyebrow);
+
         TextView title = new TextView(context);
-        title.setText("MY LAUNCHER  /  DOWNLOAD CENTER");
-        title.setTextColor(Color.rgb(32, 201, 0));
-        title.setTextSize(20);
+        title.setText("Download Center");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(27);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        title.setPadding(0, dp(18), 0, dp(4));
         root.addView(title);
 
         TextView subtitle = new TextView(context);
-        subtitle.setText("นำเข้าไฟล์เสริมจากอุปกรณ์ และติดตั้งลงในโปรไฟล์ Minecraft ที่เลือก");
-        subtitle.setTextColor(Color.rgb(91, 112, 87));
-        subtitle.setTextSize(13);
-        root.addView(subtitle, matchWrap());
+        subtitle.setText("ค้นหาและจัดการคอนเทนต์สำหรับ Minecraft Java Edition");
+        subtitle.setTextColor(Color.rgb(169, 181, 201));
+        subtitle.setTextSize(12);
+        LinearLayout.LayoutParams subtitleParams = matchWrap();
+        subtitleParams.topMargin = dp(5);
+        root.addView(subtitle, subtitleParams);
 
         TextView selected = new TextView(context);
-        selected.setText("ปลายทาง: โปรไฟล์ Minecraft ปัจจุบัน");
-        selected.setTextColor(Color.rgb(20, 35, 19));
+        selected.setText("ปลายทางการติดตั้ง  •  โปรไฟล์ Minecraft ที่เลือกอยู่");
+        selected.setTextColor(Color.rgb(222, 232, 246));
         selected.setTextSize(12);
-        selected.setPadding(dp(12), dp(10), dp(12), dp(10));
-        selected.setBackground(panelBackground("#E5FFE0"));
+        selected.setPadding(dp(13), dp(13), dp(13), dp(13));
+        selected.setBackground(panelBackground("#111B2A"));
         LinearLayout.LayoutParams selectedParams = matchWrap();
-        selectedParams.topMargin = dp(12);
+        selectedParams.topMargin = dp(16);
         root.addView(selected, selectedParams);
 
-        addSection(root, "ONLINE MODPACK CATALOG");
+        addSection(root, "BROWSE CONTENT");
+        LinearLayout firstRow = new LinearLayout(context);
+        firstRow.setOrientation(LinearLayout.HORIZONTAL);
+        Button modsButton = makeButton("🧩  Mods", "#123047");
+        Button modpacksButton = makeButton("📦  Modpacks", "#123047");
+        LinearLayout.LayoutParams half = new LinearLayout.LayoutParams(0, dp(48), 1f);
+        half.rightMargin = dp(5);
+        firstRow.addView(modsButton, half);
+        LinearLayout.LayoutParams half2 = new LinearLayout.LayoutParams(0, dp(48), 1f);
+        half2.leftMargin = dp(5);
+        firstRow.addView(modpacksButton, half2);
+        root.addView(firstRow, matchWrap());
+
+        LinearLayout secondRow = new LinearLayout(context);
+        secondRow.setOrientation(LinearLayout.HORIZONTAL);
+        Button shadersButton = makeButton("✨  Shaders", "#172235");
+        Button resourcesButton = makeButton("🎨  Resource Packs", "#172235");
+        LinearLayout.LayoutParams half3 = new LinearLayout.LayoutParams(0, dp(48), 1f);
+        half3.rightMargin = dp(5);
+        secondRow.addView(shadersButton, half3);
+        LinearLayout.LayoutParams half4 = new LinearLayout.LayoutParams(0, dp(48), 1f);
+        half4.leftMargin = dp(5);
+        secondRow.addView(resourcesButton, half4);
+        LinearLayout.LayoutParams secondRowParams = matchWrap();
+        secondRowParams.topMargin = dp(8);
+        root.addView(secondRow, secondRowParams);
+
+        Button worldsButton = makeButton("🌍  Worlds  •  นำเข้าไฟล์ ZIP", "#172235");
+        LinearLayout.LayoutParams worldsParams = matchWrap();
+        worldsParams.topMargin = dp(8);
+        root.addView(worldsButton, worldsParams);
+
+        modsButton.setOnClickListener(v ->
+                Tools.swapFragment(requireActivity(), OnlineModsFragment.class, OnlineModsFragment.TAG, null));
+        modpacksButton.setOnClickListener(v -> {
+            if (modpackSearchInput != null) {
+                modpackSearchInput.requestFocus();
+                android.view.inputmethod.InputMethodManager imm =
+                        (android.view.inputmethod.InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) imm.showSoftInput(modpackSearchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+        shadersButton.setOnClickListener(v -> chooseFile(ImportType.SHADER));
+        resourcesButton.setOnClickListener(v -> chooseFile(ImportType.RESOURCE_PACK));
+        worldsButton.setOnClickListener(v -> chooseFile(ImportType.WORLD));
+
+        addSection(root, "MODPACK CATALOG");
         LinearLayout searchRow = new LinearLayout(context);
         searchRow.setOrientation(LinearLayout.HORIZONTAL);
         modpackSearchInput = new android.widget.EditText(context);
         modpackSearchInput.setSingleLine(true);
-        modpackSearchInput.setHint("ค้นหา Modpack บน Modrinth / CurseForge");
-        modpackSearchInput.setHintTextColor(Color.GRAY);
-        modpackSearchInput.setTextColor(Color.rgb(20, 35, 19));
+        modpackSearchInput.setHint("ค้นหา Modpack จาก Modrinth / CurseForge");
+        modpackSearchInput.setHintTextColor(Color.rgb(139, 153, 174));
+        modpackSearchInput.setTextColor(Color.WHITE);
         modpackSearchInput.setTextSize(13);
-        modpackSearchInput.setPadding(dp(10), 0, dp(10), 0);
-        modpackSearchInput.setBackground(panelBackground("#FFFFFF"));
-        searchRow.addView(modpackSearchInput, new LinearLayout.LayoutParams(0, dp(48), 1f));
-        Button searchButton = makeButton("ค้นหา", "#39FF14");
-        LinearLayout.LayoutParams searchButtonParams = new LinearLayout.LayoutParams(dp(104), dp(48));
+        modpackSearchInput.setPadding(dp(12), 0, dp(12), 0);
+        modpackSearchInput.setBackground(panelBackground("#111B2A"));
+        searchRow.addView(modpackSearchInput, new LinearLayout.LayoutParams(0, dp(49), 1f));
+        Button searchButton = makeButton("ค้นหา", "#087F9F");
+        LinearLayout.LayoutParams searchButtonParams = new LinearLayout.LayoutParams(dp(94), dp(49));
         searchButtonParams.leftMargin = dp(8);
         searchRow.addView(searchButton, searchButtonParams);
-        root.addView(searchRow, matchWrap());
+        LinearLayout.LayoutParams searchRowParams = matchWrap();
+        searchRowParams.topMargin = dp(2);
+        root.addView(searchRow, searchRowParams);
         searchButton.setOnClickListener(v -> searchOnlineModpacks());
+        modpackSearchInput.setOnEditorActionListener((v, actionId, event) -> {
+            searchOnlineModpacks();
+            return true;
+        });
 
         modpackResults = new LinearLayout(context);
         modpackResults.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams resultsParams = matchWrap();
-        resultsParams.topMargin = dp(8);
+        resultsParams.topMargin = dp(9);
         root.addView(modpackResults, resultsParams);
 
-        addSection(root, "MOD CONTENT");
-        addCard(root, "🧩  Mods (.jar)", "นำไฟล์ Mod JAR ไปไว้ในโฟลเดอร์ mods", v -> chooseFile(ImportType.MOD));
-        addCard(root, "🌐  Поиск и установка модов", "Найдите моды в Modrinth, выберите версию и установите JAR в текущий профиль", v ->
-                Tools.swapFragment(requireActivity(), OnlineModsFragment.class, OnlineModsFragment.TAG, null));
-        addCard(root, "✨  Shaders (.zip)", "นำ Shader Pack ไปไว้ในโฟลเดอร์ shaderpacks", v -> chooseFile(ImportType.SHADER));
-        addCard(root, "🎨  Resource Packs (.zip)", "ตรวจ pack.mcmeta ก่อนติดตั้ง", v -> chooseFile(ImportType.RESOURCE_PACK));
-        addSection(root, "GAME CONTENT");
-        addCard(root, "🌍  Worlds (.zip)", "แตกไฟล์อย่างปลอดภัยและตรวจหา level.dat", v -> chooseFile(ImportType.WORLD));
-        addCard(root, "📦  Modpacks (.mrpack / .zip)", "ใช้ตัวติดตั้ง Modpack เดิมของ Amethyst", v -> {
+        addSection(root, "IMPORT FROM DEVICE");
+        addCard(root, "📁  Import Mod JAR", "ติดตั้งไฟล์ .jar ลงในโฟลเดอร์ mods ของโปรไฟล์ปัจจุบัน", v -> chooseFile(ImportType.MOD));
+        addCard(root, "📦  Import Modpack", "เลือกไฟล์ .mrpack หรือ .zip เพื่อติดตั้งผ่านตัวติดตั้ง Modpack", v -> {
             if (getActivity() instanceof LauncherActivity) {
                 ((LauncherActivity) requireActivity()).modpackImportLauncher.launch(null);
+            } else {
+                Toast.makeText(context, "ไม่สามารถเปิดตัวนำเข้า Modpack ได้ในหน้านี้", Toast.LENGTH_SHORT).show();
             }
         });
 
-        addSection(root, "IMPORT STATUS");
+        addSection(root, "INSTALLATION STATUS");
         statusText = new TextView(context);
-        statusText.setText("พร้อมนำเข้าไฟล์");
-        statusText.setTextColor(Color.rgb(20, 35, 19));
-        statusText.setTextSize(13);
-        statusText.setPadding(dp(12), dp(12), dp(12), dp(8));
+        statusText.setText("พร้อมใช้งาน  •  เลือกคอนเทนต์หรือไฟล์ที่ต้องการนำเข้า");
+        statusText.setTextColor(Color.rgb(226, 235, 247));
+        statusText.setTextSize(12);
+        statusText.setPadding(dp(13), dp(13), dp(13), dp(13));
+        statusText.setBackground(panelBackground("#111B2A"));
         root.addView(statusText, matchWrap());
 
         progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
         progressBar.setMax(100);
         progressBar.setProgress(0);
-        root.addView(progressBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(6)));
+        LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(5));
+        progressParams.topMargin = dp(8);
+        root.addView(progressBar, progressParams);
 
-        cancelButton = makeButton("หยุดการนำเข้า", "#FADBD8");
+        cancelButton = makeButton("หยุดการนำเข้า", "#612D3B");
         cancelButton.setEnabled(false);
         cancelButton.setOnClickListener(v -> cancelImport());
         LinearLayout.LayoutParams cancelParams = matchWrap();
@@ -174,8 +237,8 @@ public class DownloadCenterFragment extends Fragment {
         root.addView(cancelButton, cancelParams);
 
         TextView note = new TextView(context);
-        note.setText("หมายเหตุ: เลือกไฟล์จากแหล่งที่เชื่อถือได้เท่านั้น ตรวจสอบเวอร์ชัน Minecraft และ Mod Loader ให้ตรงกันก่อนเล่น");
-        note.setTextColor(Color.rgb(91, 112, 87));
+        note.setText("ติดตั้งเฉพาะไฟล์ที่เชื่อถือได้ และตรวจสอบ Minecraft Version กับ Mod Loader ให้ตรงกันก่อนเริ่มเกม");
+        note.setTextColor(Color.rgb(143, 157, 178));
         note.setTextSize(11);
         note.setPadding(0, dp(14), 0, dp(8));
         root.addView(note);
@@ -617,7 +680,7 @@ public class DownloadCenterFragment extends Fragment {
     private void addSection(LinearLayout root, String label) {
         TextView section = new TextView(requireContext());
         section.setText(label);
-        section.setTextColor(Color.rgb(32, 201, 0));
+        section.setTextColor(Color.rgb(91, 211, 238));
         section.setTextSize(11);
         section.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         section.setPadding(0, dp(18), 0, dp(6));
@@ -628,16 +691,16 @@ public class DownloadCenterFragment extends Fragment {
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(dp(14), dp(10), dp(14), dp(10));
-        card.setBackground(panelBackground("#FFFFFF"));
+        card.setBackground(panelBackground("#111B2A"));
         TextView heading = new TextView(requireContext());
         heading.setText(title);
-        heading.setTextColor(Color.rgb(20, 35, 19));
+        heading.setTextColor(Color.WHITE);
         heading.setTextSize(15);
         heading.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         card.addView(heading, matchWrap());
         TextView detail = new TextView(requireContext());
         detail.setText(description);
-        detail.setTextColor(Color.rgb(91, 112, 87));
+        detail.setTextColor(Color.rgb(169, 181, 201));
         detail.setTextSize(11);
         LinearLayout.LayoutParams detailParams = matchWrap();
         detailParams.topMargin = dp(3);
@@ -651,7 +714,7 @@ public class DownloadCenterFragment extends Fragment {
     private Button makeButton(String text, String color) {
         Button button = new Button(requireContext());
         button.setText(text);
-        button.setTextColor(Color.rgb(20, 35, 19));
+        button.setTextColor(Color.WHITE);
         button.setTextSize(12);
         button.setAllCaps(false);
         button.setBackground(panelBackground(color));
@@ -662,7 +725,7 @@ public class DownloadCenterFragment extends Fragment {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(Color.parseColor(color));
         drawable.setCornerRadius(dp(12));
-        drawable.setStroke(dp(1), Color.rgb(205, 239, 198));
+        drawable.setStroke(dp(1), Color.rgb(37, 57, 78));
         return drawable;
     }
 
