@@ -2025,13 +2025,24 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 break;
         }
 
-        try {
-            mSurface.setPointerIcon(PointerIcon.getSystemIcon(getContext(), cursorType));
-            return true;
-        } catch (Exception e) {
-            Log.w(TAG, "Unable to apply system mouse cursor type " + cursorID, e);
+        final int resolvedCursorType = cursorType;
+        final View cursorSurface = mSurface;
+        if (cursorSurface == null) {
             return false;
         }
+
+        // PointerIcon is a View property; apply it on the Android UI thread.
+        cursorSurface.post(() -> {
+            try {
+                if (mSurface == cursorSurface) {
+                    cursorSurface.setPointerIcon(
+                            PointerIcon.getSystemIcon(getContext(), resolvedCursorType));
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Unable to apply system mouse cursor type " + cursorID, e);
+            }
+        });
+        return true;
     }
 
     /**
