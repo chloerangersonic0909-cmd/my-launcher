@@ -541,7 +541,7 @@
     <string name="mylauncher_install_version">＋ Install Minecraft version</string>
     <string name="mylauncher_install_version_desc">Browse and install game versions</string>
     <string name="mylauncher_auto_ram_title">Automatic RAM allocation</string>
-    <string name="mylauncher_auto_ram_summary">Choose a safe Minecraft memory limit based on this device's RAM and currently available memory. Rechecked before every launch.</string>
+    <string name="mylauncher_auto_ram_summary">Choose a safe Minecraft memory limit based on device RAM and currently available memory. Rechecked before every launch.</string>
     <string name="mylauncher_auto_ram_active">Automatic mode: recommended %1$d MB. Turn this off to set RAM manually.</string>
 
 </resources>
