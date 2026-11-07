@@ -9,9 +9,55 @@ on:
     branches-ignore:
       - 'l10n_v3_openjdk'
   workflow_dispatch:
+    inputs:
+      test_webhook:
+        description: "ส่งข้อความทดสอบ Discord Webhook โดยไม่ Build APK"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
+  test-discord-webhook:
+    if: github.event_name == 'workflow_dispatch' && inputs.test_webhook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send test message to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "::error::DISCORD_WEBHOOK_URL secret is missing."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json, os, urllib.request
+          payload = {
+              "username": "My Launcher Test",
+              "embeds": [{
+                  "title": "🧪 My Launcher — тест webhook",
+                  "description": "Тестовое сообщение. Discord Webhook подключён и работает.",
+                  "color": 3447003,
+                  "fields": [
+                      {"name": "Статус", "value": "✅ Успешно", "inline": True},
+                      {"name": "Тип", "value": "Тест", "inline": True}
+                  ],
+                  "footer": {"text": "My Launcher • Webhook Test"}
+              }]
+          }
+          request = urllib.request.Request(
+              os.environ["DISCORD_WEBHOOK_URL"],
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST"
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              print("Discord webhook test status:", response.status)
+              if response.status not in (200, 204):
+                  raise SystemExit("Discord webhook test failed")
+          PY
+
   build:
+    if: github.event_name != 'workflow_dispatch' || inputs.test_webhook != true
     runs-on: ubuntu-22.04
     env:
       GPLAY_KEYSTORE_PASSWORD: ${{ secrets.GPLAY_KEYSTORE_PASSWORD }}
