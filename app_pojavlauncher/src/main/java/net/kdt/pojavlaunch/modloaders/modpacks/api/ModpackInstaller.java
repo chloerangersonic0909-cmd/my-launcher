@@ -158,6 +158,9 @@ public class ModpackInstaller {
         // Install the actual pack into custom_instances
         ModLoader modLoaderInfo = installFunction.installModpack(modpackFile, new File(Tools.DIR_GAME_HOME, "custom_instances/"+profileFolderName));
         ProgressLayout.clearProgress(ProgressLayout.INSTALL_MODPACK);
+        if (modLoaderInfo == null) {
+            throw new IOException("This modpack is invalid or uses an unsupported mod loader");
+        }
 
         // Create the instance (We don't have a picture guys)
         MinecraftProfile profile = MinecraftProfile.getDefaultProfile();
