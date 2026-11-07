@@ -76,3 +76,41 @@ jobs:
         with:
           name: app-release
           path: out/app-release.*
+
+      # Send Discord update announcements only for version tags (for example v0.0.0.2).
+      - name: Notify Discord about new version
+        if: success() && startsWith(github.ref, 'refs/tags/v')
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_VERSION: ${{ github.ref_name }}
+          DOWNLOAD_PAGE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL secret is not configured; skipping Discord notification."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json, os, urllib.request
+          payload = {
+              "username": "My Launcher Updates",
+              "embeds": [{
+                  "title": "🔔 My Launcher — новая версия доступна!",
+                  "description": f"**{os.environ['RELEASE_VERSION']}** успешно собрана. Новая версия готова к загрузке.",
+                  "color": 5763719,
+                  "fields": [
+                      {"name": "Версия", "value": os.environ["RELEASE_VERSION"], "inline": True},
+                      {"name": "Сборка", "value": "Успешно", "inline": True},
+                      {"name": "Скачать", "value": f"[Открыть страницу загрузки]({os.environ['DOWNLOAD_PAGE']})", "inline": False}
+                  ],
+                  "footer": {"text": "My Launcher • Android"}
+              }]
+          }
+          request = urllib.request.Request(
+              os.environ["DISCORD_WEBHOOK_URL"],
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST"
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              print("Discord webhook status:", response.status)
+          PY
