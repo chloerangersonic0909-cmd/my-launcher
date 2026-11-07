@@ -81,12 +81,17 @@ public class MainMenuFragment extends Fragment {
         Button mCustomControlButton = view.findViewById(R.id.custom_control_button);
         Button mInstallJarButton = view.findViewById(R.id.install_jar_button);
         Button downloadCenterButton = view.findViewById(R.id.download_center_button);
+        Button installVersionButton = view.findViewById(R.id.install_version_button);
         Button securityCenterButton = view.findViewById(R.id.security_center_button);
         if (securityCenterButton != null) {
             securityCenterButton.setOnClickListener(v -> showSecurityCenter());
         }
         if (downloadCenterButton != null) {
             downloadCenterButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(), DownloadCenterFragment.class, DownloadCenterFragment.TAG, null));
+        }
+        if (installVersionButton != null) {
+            installVersionButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(),
+                    DownloadCenterFragment.class, DownloadCenterFragment.TAG, null));
         }
         Button mShareLogsButton = view.findViewById(R.id.share_logs_button);
         Button mOpenDirectoryButton = view.findViewById(R.id.open_files_button);
