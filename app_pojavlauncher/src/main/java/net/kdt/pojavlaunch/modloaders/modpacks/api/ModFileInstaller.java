@@ -98,7 +98,7 @@ public final class ModFileInstaller {
                 while ((read = input.read(buffer)) != -1) {
                     if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Загрузка отменена");
                     total += read;
-                    if (total > MAX_MOD_BYTES) throw new java.io.IOException("ไฟล์มีขนาดใหญ่เกิน 512 MB");
+                    if (total > MAX_MOD_BYTES) throw new java.io.IOException("Размер файла превышает 512 МБ");
                     digest.update(buffer, 0, read);
                     output.write(buffer, 0, read);
                 }
