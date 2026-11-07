@@ -200,10 +200,21 @@ public class ModrinthApi implements ModpackApi{
             ModrinthIndex modrinthIndex = Tools.GLOBAL_GSON.fromJson(
                     Tools.read(ZipUtils.getEntryStream(modpackZipFile, "modrinth.index.json")),
                     ModrinthIndex.class);
-            
+            if (modrinthIndex == null || !"minecraft".equals(modrinthIndex.game)
+                    || modrinthIndex.dependencies == null
+                    || !modrinthIndex.dependencies.containsKey("minecraft")
+                    || modrinthIndex.files == null) {
+                throw new IOException("Modrinth modpack manifest is incomplete or invalid");
+            }
+
             ModDownloader modDownloader = new ModDownloader(instanceDestination);
-            for(ModrinthIndex.ModrinthIndexFile indexFile : modrinthIndex.files) {
-                modDownloader.submitDownload(indexFile.fileSize, indexFile.path, indexFile.hashes.sha1, indexFile.downloads);
+            for (ModrinthIndex.ModrinthIndexFile indexFile : modrinthIndex.files) {
+                if (indexFile == null || indexFile.path == null || indexFile.downloads == null
+                        || indexFile.downloads.length == 0) {
+                    throw new IOException("Modrinth modpack contains an invalid file entry");
+                }
+                String sha1 = indexFile.hashes == null ? null : indexFile.hashes.sha1;
+                modDownloader.submitDownload(indexFile.fileSize, indexFile.path, sha1, indexFile.downloads);
             }
             modDownloader.awaitFinish(new DownloaderProgressWrapper(R.string.modpack_download_downloading_mods, ProgressLayout.INSTALL_MODPACK));
             ProgressLayout.setProgress(ProgressLayout.INSTALL_MODPACK, 0, R.string.modpack_download_applying_overrides, 1, 2);
