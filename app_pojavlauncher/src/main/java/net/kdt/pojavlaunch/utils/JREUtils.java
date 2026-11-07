@@ -369,9 +369,15 @@ public class JREUtils {
         // Overridden by us to specify the exact number of cores that the android system has
         purgeArg(userArgs, "-XX:ActiveProcessorCount");
 
-        //Add automatically generated args
-        userArgs.add("-Xms" + LauncherPreferences.PREF_RAM_ALLOCATION + "M");
-        userArgs.add("-Xmx" + LauncherPreferences.PREF_RAM_ALLOCATION + "M");
+        // Recalculate the automatic heap immediately before each game launch.
+        // Manual allocation remains untouched when automatic mode is disabled.
+        int selectedRamMb = LauncherPreferences.PREF_AUTO_RAM_ALLOCATION
+                ? LauncherPreferences.getRecommendedRAMAllocation(activity)
+                : LauncherPreferences.PREF_RAM_ALLOCATION;
+
+        // Add automatically generated args
+        userArgs.add("-Xms" + selectedRamMb + "M");
+        userArgs.add("-Xmx" + selectedRamMb + "M");
         if(LOCAL_RENDERER != null) userArgs.add("-Dorg.lwjgl.opengl.libname=" + graphicsLib);
 
         // Force LWJGL to use the Freetype library intended for it, instead of using the one
@@ -406,7 +412,7 @@ public class JREUtils {
         }
 
         userArgs.addAll(JVMArgs);
-        activity.runOnUiThread(() -> Toast.makeText(activity, activity.getString(R.string.autoram_info_msg,LauncherPreferences.PREF_RAM_ALLOCATION), Toast.LENGTH_SHORT).show());
+        activity.runOnUiThread(() -> Toast.makeText(activity, activity.getString(R.string.autoram_info_msg, selectedRamMb), Toast.LENGTH_SHORT).show());
         System.out.println(JVMArgs);
 
         initJavaRuntime(runtimeHome);
