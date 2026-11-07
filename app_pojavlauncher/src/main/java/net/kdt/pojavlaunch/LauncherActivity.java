@@ -291,7 +291,13 @@ public class LauncherActivity extends BaseActivity {
 
     private void runFirstLaunchSetupIfNeeded() {
         SharedPreferences setupPrefs = getSharedPreferences("mylauncher_first_run", MODE_PRIVATE);
-        if (setupPrefs.getBoolean("components_ready", false)) return;
+        if (setupPrefs.getBoolean("components_ready", false)) {
+            if (!Tools.hasOnlineProfile()) {
+                getWindow().getDecorView().post(() -> Tools.swapFragment(this,
+                        MicrosoftLoginFragment.class, MicrosoftLoginFragment.TAG, null));
+            }
+            return;
+        }
 
         ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("My Launcher — เตรียมความพร้อม");
@@ -325,10 +331,13 @@ public class LauncherActivity extends BaseActivity {
                                 .setTitle("ติดตั้งส่วนเสริมเรียบร้อย")
                                 .setMessage("ระบบพร้อมแล้ว ขั้นตอนต่อไปคือเข้าสู่ระบบ Microsoft เพื่อใช้ Minecraft Java Edition")
                                 .setCancelable(false)
-                                .setPositiveButton("ดำเนินการต่อ", (dialog, which) ->
+                                .setPositiveButton("ดำเนินการต่อ", (dialog, which) -> {
+                                    if (!Tools.hasOnlineProfile()) {
                                         Tools.swapFragment(LauncherActivity.this,
                                                 MicrosoftLoginFragment.class,
-                                                MicrosoftLoginFragment.TAG, null))
+                                                MicrosoftLoginFragment.TAG, null);
+                                    }
+                                })
                                 .show();
                     } else {
                         new AlertDialog.Builder(LauncherActivity.this)
