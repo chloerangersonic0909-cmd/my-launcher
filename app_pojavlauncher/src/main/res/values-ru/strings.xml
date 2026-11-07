@@ -475,4 +475,19 @@
     <string name="angelica_found_sfpew_notice">Обнаружен мод Angelica. Simple FPE Wrapper не требуется.</string>
     <string name="use_angle_checkbox">Использовать ANGLE (может повысить FPS)</string>
 
+    <!-- My Launcher professional home UI -->
+    <string name="mylauncher_brand">МОЙ ЛАУНЧЕР</string>
+    <string name="mylauncher_subtitle">РАБОЧАЯ СРЕДА MINECRAFT JAVA</string>
+    <string name="mylauncher_system_ready">● СИСТЕМА ГОТОВА</string>
+    <string name="mylauncher_next_world">ВАШ СЛЕДУЮЩИЙ МИР</string>
+    <string name="mylauncher_ready_play">Готовы к игре?</string>
+    <string name="mylauncher_choose_version">Выберите версию Minecraft и начните игру.</string>
+    <string name="mylauncher_quick_access">БЫСТРЫЙ ДОСТУП</string>
+    <string name="mylauncher_download_center">Центр загрузок</string>
+    <string name="mylauncher_security_center">Центр безопасности</string>
+    <string name="mylauncher_edit_profile">Изменить профиль</string>
+    <string name="mylauncher_library">БИБЛИОТЕКА</string>
+    <string name="mylauncher_platform">Minecraft • Android</string>
+    <string name="mylauncher_system_status">СОСТОЯНИЕ СИСТЕМЫ</string>
+    <string name="mylauncher_quick_access_desc">Управляйте версиями, модами, шейдерами, наборами ресурсов и мирами в центре загрузок.</string>
 </resources>
