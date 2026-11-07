@@ -100,8 +100,6 @@ public class MainMenuFragment extends Fragment {
                 Tools.swapFragment(requireActivity(), LauncherPreferenceFragment.class, "LauncherPreferenceFragment", null));
 
         ImageButton mEditProfileButton = view.findViewById(R.id.edit_profile_button);
-        View addAccountButton = view.findViewById(R.id.add_account_button);
-        if (addAccountButton != null) addAccountButton.setOnClickListener(v -> showAddAccountDialog());
         Button mPlayButton = view.findViewById(R.id.play_button);
         mVersionSpinner = view.findViewById(R.id.mc_version_spinner);
         mBackgroundStatus = view.findViewById(R.id.background_status_text);
