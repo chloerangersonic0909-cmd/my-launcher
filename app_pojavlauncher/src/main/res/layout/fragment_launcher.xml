@@ -70,6 +70,15 @@
                     android:textColor="#76E6C2"
                     android:textSize="10sp"
                     android:textStyle="bold" />
+                <ImageButton
+                    android:id="@+id/mylauncher_settings_button"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Settings"
+                    android:src="@android:drawable/ic_menu_preferences"
+                    android:tint="#FFFFFF" />
             </LinearLayout>
 
             <LinearLayout
