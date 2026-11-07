@@ -247,7 +247,7 @@ public class MainMenuFragment extends Fragment {
                 .openInputStream(android.net.Uri.parse(savedUri))) {
             Drawable image = Drawable.createFromStream(input, null);
             if (image == null) throw new java.io.IOException("Unsupported background image");
-            image.setColorFilter(new PorterDuffColorFilter(0x88000000, PorterDuff.Mode.SRC_ATOP));
+            image.setColorFilter(new PorterDuffColorFilter(0x99FFFFFF, PorterDuff.Mode.SRC_ATOP));
             root.setBackground(image);
         } catch (Exception e) {
             requireContext().getSharedPreferences(
