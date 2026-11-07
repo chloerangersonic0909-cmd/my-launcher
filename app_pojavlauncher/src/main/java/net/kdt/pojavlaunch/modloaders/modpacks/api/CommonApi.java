@@ -146,15 +146,13 @@ public class CommonApi implements ModpackApi {
             boolean isModrinth;
             boolean isCurseforge;
 
-            try {
-                ZipUtils.getEntryStream(zip, "modrinth.index.json");
+            try (InputStream ignored = ZipUtils.getEntryStream(zip, "modrinth.index.json")) {
                 isModrinth = true;
             } catch (IOException ignored) {
                 isModrinth = false;
             }
 
-            try {
-                ZipUtils.getEntryStream(zip, "manifest.json");
+            try (InputStream ignored = ZipUtils.getEntryStream(zip, "manifest.json")) {
                 isCurseforge = true;
             } catch (IOException ignored) {
                 isCurseforge = false;
