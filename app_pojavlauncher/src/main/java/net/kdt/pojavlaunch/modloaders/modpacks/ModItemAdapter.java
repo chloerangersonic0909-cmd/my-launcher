@@ -161,6 +161,7 @@ public class ModItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private Bitmap mThumbnailBitmap;
         private ImageReceiver mImageReceiver;
         private boolean mInstallEnabled;
+        private int[] mDisplayedVersionIndices = new int[0];
 
         /* Used to display available versions of the mod(pack) */
         private final SimpleArrayAdapter<String> mVersionAdapter = new SimpleArrayAdapter<>(null);
@@ -182,12 +183,12 @@ public class ModItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             mModpackApi.handleInstallation(
                                     mExtendedButton.getContext().getApplicationContext(),
                                     mModDetail,
-                                    mExtendedSpinner.getSelectedItemPosition());
+                                    getSelectedVersionIndex());
                         } else {
                             ModFileInstaller.installAsync(
                                     mExtendedButton.getContext().getApplicationContext(),
                                     mModDetail,
-                                    mExtendedSpinner.getSelectedItemPosition());
+                                    getSelectedVersionIndex());
                         }
                     });
                     mExtendedSpinner.setAdapter(mLoadingAdapter);
@@ -280,9 +281,43 @@ public class ModItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         /** Display extended info/interaction about a modpack */
         private void setStateDetailed(ModDetail detailedItem) {
             if(detailedItem != null) {
+                java.util.ArrayList<String> labels = new java.util.ArrayList<>();
+                java.util.ArrayList<Integer> indices = new java.util.ArrayList<>();
+                for (int i = 0; i < detailedItem.versionNames.length; i++) {
+                    boolean compatible = true;
+                    if (!detailedItem.isModpack && mSearchFilters.mcVersion != null
+                            && !mSearchFilters.mcVersion.isEmpty()) {
+                        compatible = mSearchFilters.mcVersion.equals(detailedItem.mcVersionNames[i]);
+                    }
+                    if (compatible && !detailedItem.isModpack && mSearchFilters.loader != null
+                            && detailedItem.versionLoaders != null && i < detailedItem.versionLoaders.length
+                            && detailedItem.versionLoaders[i] != null) {
+                        compatible = false;
+                        for (String loader : detailedItem.versionLoaders[i]) {
+                            if (mSearchFilters.loader.equalsIgnoreCase(loader)) {
+                                compatible = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (compatible) {
+                        labels.add(detailedItem.versionNames[i]);
+                        indices.add(i);
+                    }
+                }
+                mDisplayedVersionIndices = new int[indices.size()];
+                for (int i = 0; i < indices.size(); i++) mDisplayedVersionIndices[i] = indices.get(i);
+                if (labels.isEmpty()) {
+                    setInstallEnabled(false);
+                    mExtendedErrorTextView.setVisibility(View.VISIBLE);
+                    mExtendedErrorTextView.setText("ไม่มีเวอร์ชันที่ตรงกับ Minecraft / Mod Loader ที่เลือก");
+                    mVersionAdapter.setObjects(null);
+                    mExtendedSpinner.setAdapter(null);
+                    return;
+                }
                 setInstallEnabled(true);
                 mExtendedErrorTextView.setVisibility(View.GONE);
-                mVersionAdapter.setObjects(Arrays.asList(detailedItem.versionNames));
+                mVersionAdapter.setObjects(labels);
                 mExtendedSpinner.setAdapter(mVersionAdapter);
             } else {
                 closeDetailedView();
@@ -290,7 +325,14 @@ public class ModItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 mExtendedErrorTextView.setVisibility(View.VISIBLE);
                 mExtendedSpinner.setAdapter(null);
                 mVersionAdapter.setObjects(null);
+                mDisplayedVersionIndices = new int[0];
             }
+        }
+
+        private int getSelectedVersionIndex() {
+            int position = mExtendedSpinner == null ? -1 : mExtendedSpinner.getSelectedItemPosition();
+            return position >= 0 && position < mDisplayedVersionIndices.length
+                    ? mDisplayedVersionIndices[position] : -1;
         }
 
         private void openDetailedView() {
