@@ -228,6 +228,7 @@ public class CallbackBridge {
     public static final int ACTION_SEND_TEXTBOX_RECT = 1;
     public static final int ACTION_INIT_CONTROLLER = 2;
     public static final int ACTION_DEINIT_CONTROLLER = 3;
+    public static final int ACTION_SET_MOUSE_CURSOR = 4;
     /**
      * Used for any sort of notification that needs to be given from the JRE side
      * @return if notification successful
@@ -266,6 +267,10 @@ public class CallbackBridge {
                 if (action[0] == ACTION_DEINIT_CONTROLLER) {
                     sdlControllerActive = false;
                     onDirectInputEnable();
+                }
+                if (action[0] == ACTION_SET_MOUSE_CURSOR && action.length > 1) {
+                    // GLFW cursor requests are forwarded to Android's native pointer theme.
+                    SDLActivity.setSystemCursor(action[1]);
                 }
 
         }
