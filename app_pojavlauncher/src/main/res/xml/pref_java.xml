@@ -19,6 +19,12 @@
             android:summary="@string/mcl_setting_subtitle_javaargs"
             android:title="@string/mcl_setting_title_javaargs" />
 
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="auto_ram_allocation"
+            android:title="@string/mylauncher_auto_ram_title"
+            android:summary="@string/mylauncher_auto_ram_summary" />
+
         <net.kdt.pojavlaunch.prefs.CustomSeekBarPreference
             android:key="allocation"
 
