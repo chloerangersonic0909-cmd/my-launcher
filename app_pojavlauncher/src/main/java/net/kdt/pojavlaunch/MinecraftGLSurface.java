@@ -470,7 +470,21 @@ public class MinecraftGLSurface extends View implements GrabListener, DirectGame
                 view.getSurfaceTexture().setDefaultBufferSize(windowWidth, windowHeight);
             }
         }
-        if (sdlEnabled) SDLActivity.getSDLSurface().nativeResize(windowWidth, windowHeight);
+        // SDL's Java surface can be temporarily unavailable while Android recreates
+        // the rendering surface (for example, when returning from the background).
+        // Capture it once to avoid a null dereference during lifecycle transitions.
+        if (sdlEnabled) {
+            SDLSurface sdlSurface = SDLActivity.getSDLSurface();
+            if (sdlSurface != null) {
+                try {
+                    sdlSurface.nativeResize(windowWidth, windowHeight);
+                } catch (IllegalStateException e) {
+                    Log.w(TAG, "Skipping SDL resize while the native surface is not ready", e);
+                }
+            } else {
+                Log.d(TAG, "Skipping SDL resize: SDL surface is not initialized");
+            }
+        }
 
         CallbackBridge.sendUpdateWindowSize(windowWidth, windowHeight);
     }
