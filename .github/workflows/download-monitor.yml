@@ -1,0 +1,111 @@
+name: Discord Download Monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  monitor-downloads:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Check artifact download counts and notify Discord
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          STATE_FILE: .github/download-monitor-state.json
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.error, urllib.parse, urllib.request
+
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["REPOSITORY"]
+          state_path = pathlib.Path(os.environ["STATE_FILE"])
+          webhook = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
+          api = f"https://api.github.com/repos/{repo}/actions/artifacts?per_page=100"
+
+          def get_json(url):
+              req = urllib.request.Request(url, headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {token}",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "User-Agent": "MyLauncher-Download-Monitor/1.0"
+              })
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+
+          total = 0
+          page = 1
+          while True:
+              data = get_json(api + f"&page={page}")
+              artifacts = data.get("artifacts", [])
+              total += sum(int(a.get("download_count", 0)) for a in artifacts if not a.get("expired", False))
+              if len(artifacts) < 100:
+                  break
+              page += 1
+
+          previous = None
+          if state_path.exists():
+              try:
+                  previous = int(json.loads(state_path.read_text()).get("total_downloads", 0))
+              except Exception:
+                  previous = None
+
+          state_path.parent.mkdir(parents=True, exist_ok=True)
+          state_path.write_text(json.dumps({"total_downloads": total}, indent=2) + "\\n")
+
+          if previous is None:
+              print(f"Initialized download baseline at {total}. No notification sent.")
+          elif total > previous:
+              increase = total - previous
+              print(f"Download count increased by {increase}: {previous} -> {total}")
+              if not webhook:
+                  raise SystemExit("DISCORD_WEBHOOK_URL secret is missing.")
+              parsed = urllib.parse.urlsplit(webhook)
+              if parsed.scheme != "https" or parsed.hostname not in ("discord.com", "discordapp.com") or not parsed.path.startswith("/api/webhooks/"):
+                  raise SystemExit("DISCORD_WEBHOOK_URL format is invalid.")
+              payload = {
+                  "username": "My Launcher Downloads",
+                  "embeds": [{
+                      "title": "📥 My Launcher — มีการดาวน์โหลดเพิ่ม",
+                      "description": f"ตรวจพบยอดดาวน์โหลด Artifact เพิ่มขึ้น **{increase} ครั้ง**",
+                      "color": 3447003,
+                      "fields": [
+                          {"name": "ยอดดาวน์โหลดรวมของไฟล์ที่ยังไม่หมดอายุ", "value": str(total), "inline": True},
+                          {"name": "ยอดก่อนหน้า", "value": str(previous), "inline": True},
+                          {"name": "ตรวจสอบไฟล์", "value": f"[เปิดหน้า Actions Artifacts](https://github.com/{repo}/actions)", "inline": False}
+                      ],
+                      "footer": {"text": "My Launcher • Download Monitor"}
+                  }]
+              }
+              req = urllib.request.Request(webhook, data=json.dumps(payload).encode(),
+                  headers={"Content-Type": "application/json", "User-Agent": "MyLauncher-GitHubActions/1.0"}, method="POST")
+              with urllib.request.urlopen(req, timeout=20) as response:
+                  print("Discord notification status:", response.status)
+          elif total < previous:
+              print(f"Artifact retention changed the baseline: {previous} -> {total}")
+          else:
+              print(f"No new downloads. Total: {total}")
+          PY
+
+      - name: Save download-count baseline
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/download-monitor-state.json
+          if git diff --cached --quiet; then
+            echo "Download baseline unchanged."
+          else
+            git commit -m "Update download monitor baseline [skip ci]"
+            git push
+          fi
