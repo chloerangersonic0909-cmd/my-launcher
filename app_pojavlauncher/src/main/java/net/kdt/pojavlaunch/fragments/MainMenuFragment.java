@@ -12,6 +12,9 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -98,6 +101,7 @@ public class MainMenuFragment extends Fragment {
         if (mStopGameButton != null) {
             mStopGameButton.setOnClickListener(v -> confirmStopGame());
         }
+        applyCustomBackground(view);
         refreshBackgroundControls();
 
         mNewsButton.setOnClickListener(v -> Tools.openURL(requireActivity(), Tools.URL_HOME));
@@ -226,7 +230,32 @@ public class MainMenuFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mVersionSpinner.reloadProfiles();
+        if (getView() != null) applyCustomBackground(getView());
         refreshBackgroundControls();
+    }
+
+    private void applyCustomBackground(View root) {
+        if (!isAdded() || root == null) return;
+        String savedUri = requireContext().getSharedPreferences(
+                "mylauncher_customization", android.content.Context.MODE_PRIVATE)
+                .getString("background_uri", null);
+        if (savedUri == null) {
+            root.setBackgroundResource(R.color.background_app);
+            return;
+        }
+        try (java.io.InputStream input = requireContext().getContentResolver()
+                .openInputStream(android.net.Uri.parse(savedUri))) {
+            Drawable image = Drawable.createFromStream(input, null);
+            if (image == null) throw new java.io.IOException("Unsupported background image");
+            image.setColorFilter(new PorterDuffColorFilter(0x88000000, PorterDuff.Mode.SRC_ATOP));
+            root.setBackground(image);
+        } catch (Exception e) {
+            requireContext().getSharedPreferences(
+                    "mylauncher_customization", android.content.Context.MODE_PRIVATE)
+                    .edit().remove("background_uri").apply();
+            root.setBackgroundResource(R.color.background_app);
+            Toast.makeText(requireContext(), "ไม่พบภาพพื้นหลังเดิม คืนค่าเริ่มต้นแล้ว", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void requestBackgroundNotificationPermission() {
