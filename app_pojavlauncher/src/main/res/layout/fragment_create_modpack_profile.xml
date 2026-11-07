@@ -13,7 +13,7 @@
     <View
         android:id="@+id/create_modpack_profile_menu"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_250sdp"
+        android:layout_height="@dimen/_320sdp"
 
         android:background="@drawable/background_card"
         android:translationZ="-1dp"
@@ -47,10 +47,23 @@
         android:textSize="@dimen/_12ssp"
         android:layout_marginHorizontal="@dimen/_25sdp"
         android:layout_marginBottom="@dimen/_16sdp"
-        app:layout_constraintBottom_toTopOf="@+id/button_import_modpack"
+        app:layout_constraintBottom_toTopOf="@+id/button_import_mod_jar"
         app:layout_constraintEnd_toEndOf="@+id/create_modpack_profile_menu"
         app:layout_constraintStart_toStartOf="@+id/create_modpack_profile_menu"
         app:layout_constraintTop_toBottomOf="@+id/button_browse_modpacks" />
+
+    <com.kdt.mcgui.MineButton
+        android:id="@+id/button_import_mod_jar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Import Mod JAR"
+        android:textSize="@dimen/_12ssp"
+        android:layout_marginHorizontal="@dimen/_25sdp"
+        android:layout_marginBottom="@dimen/_16sdp"
+        app:layout_constraintBottom_toTopOf="@+id/button_import_modpack"
+        app:layout_constraintEnd_toEndOf="@+id/create_modpack_profile_menu"
+        app:layout_constraintStart_toStartOf="@+id/create_modpack_profile_menu"
+        app:layout_constraintTop_toBottomOf="@+id/button_export_modpack" />
 
     <com.kdt.mcgui.MineButton
         android:id="@+id/button_import_modpack"
@@ -63,6 +76,6 @@
         app:layout_constraintEnd_toEndOf="@+id/create_modpack_profile_menu"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/create_modpack_profile_menu"
-        app:layout_constraintTop_toBottomOf="@+id/button_export_modpack" />
+        app:layout_constraintTop_toBottomOf="@+id/button_import_mod_jar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
