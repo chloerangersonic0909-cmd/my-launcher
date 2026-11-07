@@ -149,40 +149,45 @@ jobs:
           body: "My Launcher รุ่น ${{ github.ref_name }} พร้อมดาวน์โหลด"
           files: out/app-release.apk
 
-      # Send Discord update announcements only for version tags (for example v0.0.0.2).
-      - name: Notify Discord about new version
-        if: success() && startsWith(github.ref, 'refs/tags/v')
+      # Notify the same Discord channel whenever a debug APK build succeeds.
+      - name: Notify Discord about successful APK build
+        if: success() && github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RELEASE_VERSION: ${{ github.ref_name }}
-          APK_DOWNLOAD_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/app-release.apk
+          BRANCH_NAME: ${{ github.ref_name }}
+          BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
-            echo "DISCORD_WEBHOOK_URL secret is not configured; skipping Discord notification."
+            echo "::warning::DISCORD_WEBHOOK_URL secret is missing; Discord notification skipped."
             exit 0
           fi
           python3 - <<'PY'
-          import json, os, urllib.request
+          import json, os, re, urllib.error, urllib.parse, urllib.request
+          webhook = os.environ["DISCORD_WEBHOOK_URL"].strip()
+          parsed = urllib.parse.urlsplit(webhook)
+          if parsed.scheme != "https" or parsed.hostname not in ("discord.com", "discordapp.com") or not re.fullmatch(r"/api/webhooks/[0-9]+/[A-Za-z0-9._-]+/?", parsed.path):
+              raise SystemExit("DISCORD_WEBHOOK_URL format is invalid.")
           payload = {
               "username": "My Launcher Updates",
               "embeds": [{
-                  "title": "🔔 My Launcher — มีเวอร์ชันใหม่พร้อมใช้งานแล้ว!",
-                  "description": f"**{os.environ['RELEASE_VERSION']}** สร้างไฟล์ APK สำเร็จ พร้อมดาวน์โหลดแล้ว",
+                  "title": "🔔 My Launcher — APK Build สำเร็จ",
+                  "description": "มีไฟล์ APK รุ่นทดสอบใหม่พร้อมดาวน์โหลดจาก GitHub Actions",
                   "color": 5763719,
                   "fields": [
-                      {"name": "เวอร์ชัน", "value": os.environ["RELEASE_VERSION"], "inline": True},
-                      {"name": "สถานะการสร้าง", "value": "✅ สำเร็จ", "inline": True},
-                      {"name": "ดาวน์โหลด APK", "value": f"[กดที่นี่เพื่อดาวน์โหลด APK]({os.environ['APK_DOWNLOAD_URL']})", "inline": False}
+                      {"name": "Branch", "value": os.environ["BRANCH_NAME"], "inline": True},
+                      {"name": "สถานะ", "value": "✅ Build สำเร็จ", "inline": True},
+                      {"name": "ดาวน์โหลด APK", "value": f"[เปิดหน้า Artifacts / ดาวน์โหลด APK]({os.environ['BUILD_URL']})", "inline": False}
                   ],
                   "footer": {"text": "My Launcher • Android"}
               }]
           }
-          request = urllib.request.Request(
-              os.environ["DISCORD_WEBHOOK_URL"],
-              data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json"},
-              method="POST"
-          )
-          with urllib.request.urlopen(request, timeout=20) as response:
-              print("Discord webhook status:", response.status)
+          request = urllib.request.Request(webhook, data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json", "User-Agent": "MyLauncher-GitHubActions/1.0"}, method="POST")
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  print("Discord webhook status:", response.status)
+          except urllib.error.HTTPError as error:
+              print("Discord webhook rejected request; HTTP", error.code)
+              print(error.read(500).decode("utf-8", errors="replace"))
+              raise SystemExit("Discord notification failed.")
           PY
