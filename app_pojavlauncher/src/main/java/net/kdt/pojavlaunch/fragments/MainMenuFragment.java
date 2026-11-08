@@ -101,6 +101,17 @@ public class MainMenuFragment extends Fragment {
 
         ImageButton mEditProfileButton = view.findViewById(R.id.edit_profile_button);
         Button mPlayButton = view.findViewById(R.id.play_button);
+        View sidebarPlayButton = view.findViewById(R.id.menu_play_button);
+        if (sidebarPlayButton != null) {
+            sidebarPlayButton.setOnClickListener(v -> {
+                if (mPlayButton != null) mPlayButton.performClick();
+            });
+        }
+        View sidebarSkinsButton = view.findViewById(R.id.menu_skins_button);
+        if (sidebarSkinsButton != null) {
+            sidebarSkinsButton.setOnClickListener(v ->
+                    Tools.openURL(requireActivity(), "https://ely.by/skins"));
+        }
         mVersionSpinner = view.findViewById(R.id.mc_version_spinner);
         mBackgroundStatus = view.findViewById(R.id.background_status_text);
         mStopGameButton = view.findViewById(R.id.stop_game_button);
