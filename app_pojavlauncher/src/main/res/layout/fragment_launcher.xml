@@ -174,7 +174,6 @@
                 android:layout_marginTop="5dp"
                 android:background="@drawable/mylauncher_dark_card"
                 android:drawableStart="@drawable/ic_menu_settings"
-                android:id="@+id/mylauncher_settings_button"
                 android:text="Settings"
                 android:textColor="#D8DCE5"
                 android:textSize="10sp"
