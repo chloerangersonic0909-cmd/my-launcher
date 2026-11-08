@@ -71,24 +71,24 @@ public class ModrinthApi implements ModpackApi{
         JsonArray responseHits = response.getAsJsonArray("hits");
         if(responseHits == null) return null;
 
-        ModItem[] items = new ModItem[responseHits.size()];
+        ArrayList<ModItem> items = new ArrayList<>(responseHits.size());
         for(int i=0; i<responseHits.size(); ++i){
             JsonObject hit = responseHits.get(i).getAsJsonObject();
             String projectType = GsonJsonUtils.getStringSafe(hit, "project_type");
             String projectId = GsonJsonUtils.getStringSafe(hit, "project_id");
             if (projectId == null || projectId.isEmpty()) continue;
-            items[i] = new ModItem(
+            items.add(new ModItem(
                     Constants.SOURCE_MODRINTH,
                     "modpack".equals(projectType),
                     projectId,
                     GsonJsonUtils.getStringSafe(hit, "title"),
                     GsonJsonUtils.getStringSafe(hit, "description"),
                     GsonJsonUtils.getStringSafe(hit, "icon_url")
-            );
+            ));
         }
         if(modrinthSearchResult == null) modrinthSearchResult = new ModrinthSearchResult();
         modrinthSearchResult.previousOffset += responseHits.size();
-        modrinthSearchResult.results = items;
+        modrinthSearchResult.results = items.toArray(new ModItem[0]);
         modrinthSearchResult.totalResultCount = response.get("total_hits").getAsInt();
         return modrinthSearchResult;
     }
