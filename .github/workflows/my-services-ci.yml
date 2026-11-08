@@ -1,0 +1,29 @@
+name: MY SERVICES Core CI
+on:
+  push:
+    branches: [feature/launcher-maintenance-suite]
+    paths:
+      - 'my-services/**'
+      - '.github/workflows/my-services-ci.yml'
+  pull_request:
+    paths:
+      - 'my-services/**'
+      - '.github/workflows/my-services-ci.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: my-services
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: my-services/package.json
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Check JavaScript syntax
+        run: npm run check
