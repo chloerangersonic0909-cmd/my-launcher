@@ -34,8 +34,8 @@ public class MinecraftAccount {
     private Bitmap mFaceCache;
     
     void updateSkinFace(String uuid) {
+        File skinFile = getSkinFaceFile(username);
         try {
-            File skinFile = getSkinFaceFile(username);
             Tools.downloadFile("https://mc-heads.net/head/" + uuid + "/100", skinFile.getAbsolutePath());
             
             Log.i("SkinLoader", "Update skin face success");
