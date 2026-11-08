@@ -81,10 +81,16 @@ public class CommonApi implements ModpackApi {
                 if(searchResult != null) hasSuccessful = true;
                 else continue;
                 totalSize += searchResult.totalResultCount;
-            }catch (Exception e) {
+            } catch (InterruptedException e) {
                 cancelAllFutures(futures);
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
                 return null;
+            } catch (Exception e) {
+                // A provider outage or missing API key must not hide results from
+                // the other providers. Keep the successful provider responses and
+                // allow this provider to be retried on a fresh search.
+                results[i] = null;
+                Log.w("CommonApi", "Provider " + i + " failed; continuing with available providers", e);
             }
         }
         if(!hasSuccessful) {
