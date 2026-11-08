@@ -539,6 +539,80 @@ public class MinecraftGLSurface extends View implements GrabListener, DirectGame
                 Gravity.TOP | Gravity.START);
         params.setMargins((int) (10 * density), (int) (10 * density), 0, 0);
         container.addView(mFpsOverlay, params);
+
+        // Only the FPS label is movable. Virtual game controls remain untouched.
+        mFpsOverlay.setClickable(true);
+        mFpsOverlay.setOnTouchListener(new View.OnTouchListener() {
+            private float downRawX;
+            private float downRawY;
+            private int startLeft;
+            private int startTop;
+            private boolean moved;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                if (!(view.getParent() instanceof FrameLayout)) return false;
+                FrameLayout parent = (FrameLayout) view.getParent();
+                FrameLayout.LayoutParams layoutParams =
+                        (FrameLayout.LayoutParams) view.getLayoutParams();
+
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        downRawX = event.getRawX();
+                        downRawY = event.getRawY();
+                        startLeft = layoutParams.leftMargin;
+                        startTop = layoutParams.topMargin;
+                        moved = false;
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        float deltaX = event.getRawX() - downRawX;
+                        float deltaY = event.getRawY() - downRawY;
+                        if (Math.abs(deltaX) > 3f || Math.abs(deltaY) > 3f) moved = true;
+                        int maxLeft = Math.max(0, parent.getWidth() - view.getWidth());
+                        int maxTop = Math.max(0, parent.getHeight() - view.getHeight());
+                        layoutParams.leftMargin = Math.max(0, Math.min(maxLeft, startLeft + Math.round(deltaX)));
+                        layoutParams.topMargin = Math.max(0, Math.min(maxTop, startTop + Math.round(deltaY)));
+                        layoutParams.gravity = Gravity.TOP | Gravity.START;
+                        view.setLayoutParams(layoutParams);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        if (moved && parent.getWidth() > 0 && parent.getHeight() > 0) {
+                            getContext().getSharedPreferences("my_launcher_hud", Context.MODE_PRIVATE)
+                                    .edit()
+                                    .putFloat("fps_x_ratio", layoutParams.leftMargin /
+                                            (float) Math.max(1, parent.getWidth() - view.getWidth()))
+                                    .putFloat("fps_y_ratio", layoutParams.topMargin /
+                                            (float) Math.max(1, parent.getHeight() - view.getHeight()))
+                                    .apply();
+                        }
+                        view.performClick();
+                        return true;
+                    case MotionEvent.ACTION_CANCEL:
+                    default:
+                        return true;
+                }
+            }
+        });
+
+        // Restore normalized coordinates so the HUD stays in place after rotation/resizing.
+        mFpsOverlay.post(() -> {
+            if (mFpsOverlay == null || !(mFpsOverlay.getParent() instanceof FrameLayout)) return;
+            FrameLayout parent = (FrameLayout) mFpsOverlay.getParent();
+            if (parent.getWidth() <= 0 || parent.getHeight() <= 0) return;
+            android.content.SharedPreferences preferences =
+                    getContext().getSharedPreferences("my_launcher_hud", Context.MODE_PRIVATE);
+            float xRatio = preferences.getFloat("fps_x_ratio", -1f);
+            float yRatio = preferences.getFloat("fps_y_ratio", -1f);
+            if (xRatio < 0f || yRatio < 0f) return;
+            FrameLayout.LayoutParams restored =
+                    (FrameLayout.LayoutParams) mFpsOverlay.getLayoutParams();
+            int maxLeft = Math.max(0, parent.getWidth() - mFpsOverlay.getWidth());
+            int maxTop = Math.max(0, parent.getHeight() - mFpsOverlay.getHeight());
+            restored.leftMargin = Math.round(Math.max(0f, Math.min(1f, xRatio)) * maxLeft);
+            restored.topMargin = Math.round(Math.max(0f, Math.min(1f, yRatio)) * maxTop);
+            restored.gravity = Gravity.TOP | Gravity.START;
+            mFpsOverlay.setLayoutParams(restored);
+        });
     }
 
     /** Called for each newly submitted TextureView frame. */
