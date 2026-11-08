@@ -210,7 +210,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="26dp"
             android:layout_marginBottom="10dp"
-            android:text="LIBRARY & TOOLS"
+            android:text="LIBRARY &amp; TOOLS"
             android:textColor="#B8FF68"
             android:textSize="10sp"
             android:textStyle="bold"
