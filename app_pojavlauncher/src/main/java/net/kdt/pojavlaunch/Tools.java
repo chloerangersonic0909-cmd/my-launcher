@@ -491,6 +491,14 @@ public final class Tools {
         javaArgList.add("-Djava.library.path="+javaLibraryPath);
 
         javaArgList.addAll(Arrays.asList(getMinecraftJVMArgs(versionId, gamedir)));
+        if (minecraftAccount.isElyBy) {
+            File authlibInjector = new File(Tools.DIR_DATA, "authlib-injector.jar");
+            if (!authlibInjector.isFile() || authlibInjector.length() < 100000) {
+                Toast.makeText(activity, "ไม่พบ Authlib Injector สำหรับบัญชี Ely.by กรุณาเข้าสู่ระบบ Ely.by อีกครั้ง", Toast.LENGTH_LONG).show();
+                return;
+            }
+            javaArgList.add("-javaagent:" + authlibInjector.getAbsolutePath() + "=ely.by");
+        }
         javaArgList.add("-cp"); javaArgList.add(launchClasspath);
 
         // Some modloaders (babric) don't fully respect java.libary.path and only use the native lib dir
