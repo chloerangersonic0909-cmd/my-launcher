@@ -112,6 +112,7 @@ public class SelectAuthFragment extends Fragment {
 
     private void authenticateElyBy(String login, String password, String otp,
                                    AlertDialog dialog, Button submit) {
+        Context appContext = requireContext().getApplicationContext();
         PojavApplication.sExecutorService.execute(() -> {
             try {
                 File injector = ensureAuthlibInjector();
@@ -141,7 +142,7 @@ public class SelectAuthFragment extends Fragment {
                 account.clientToken = response.optString("clientToken", clientToken);
                 account.isElyBy = true;
                 account.save();
-                PojavProfile.setCurrentProfile(requireContext(), playerName);
+                PojavProfile.setCurrentProfile(appContext, playerName);
 
                 Tools.runOnUiThread(() -> {
                     if (!isAdded()) return;
@@ -181,7 +182,9 @@ public class SelectAuthFragment extends Fragment {
         connection.setRequestProperty("User-Agent", "MyLauncher/0.0.0.2 (Android)");
         try {
             byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
-            connection.getOutputStream().write(body);
+            try (java.io.OutputStream output = connection.getOutputStream()) {
+                output.write(body);
+            }
             int status = connection.getResponseCode();
             InputStream stream = status >= 200 && status < 300
                     ? connection.getInputStream() : connection.getErrorStream();
@@ -266,7 +269,7 @@ public class SelectAuthFragment extends Fragment {
 
     private static String sha256(File file) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (InputStream input = new FileInputStreamCompat(file)) {
+        try (InputStream input = new java.io.FileInputStream(file)) {
             byte[] buffer = new byte[8192];
             int count;
             while ((count = input.read(buffer)) != -1) digest.update(buffer, 0, count);
@@ -283,7 +286,4 @@ public class SelectAuthFragment extends Fragment {
                 value.substring(12, 16) + "-" + value.substring(16, 20) + "-" + value.substring(20);
     }
 
-    private static final class FileInputStreamCompat extends java.io.FileInputStream {
-        FileInputStreamCompat(File file) throws java.io.FileNotFoundException { super(file); }
-    }
 }
