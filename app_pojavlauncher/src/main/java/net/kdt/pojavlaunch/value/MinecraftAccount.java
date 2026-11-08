@@ -27,6 +27,7 @@ public class MinecraftAccount {
     public String selectedVersion = "1.7.10";
     public boolean isMicrosoft = false;
     public boolean isElyBy = false;
+    public boolean hasMinecraftProfile = true;
     public String msaRefreshToken = "0";
     public String xuid;
     public long expiresAt;
@@ -60,6 +61,11 @@ public class MinecraftAccount {
     }
     
     public void updateSkinFace() {
+        if (profileId == null || profileId.trim().isEmpty() ||
+                "00000000-0000-0000-0000-000000000000".equals(profileId)) {
+            updateSkinFace("Steve");
+            return;
+        }
         updateSkinFace(profileId);
     }
     
