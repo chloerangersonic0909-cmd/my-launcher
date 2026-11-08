@@ -508,7 +508,7 @@
     <string name="global_installing">Installing…</string>
     <string name="error_key_unsupported">Error! The key assigned to this button is invalid. Did you try updating?</string>
     <string name="error_invalid_value">Error! Invalid value!</string>
-    <string name="minecraft_no_username_set">Your Minecraft Java profile is not set up yet. Create your Java profile on the official Minecraft website first. A default skin can be used only after a valid Java profile exists.</string>
+    <string name="minecraft_no_username_set">Your Microsoft account is signed in, but it has no Minecraft Java profile yet. Create a Java profile on the official Minecraft website before launching. The launcher will show the default Steve avatar until then.</string>
     <string name="create_lwjgl3ify_profile">Create LWJGL3ify profile</string>
     <string name="select_lwjgl3ify_version">Select LWJGL3ify version</string>
     <string name="lwjgl3ify_installer_available_versions">Supported LWJGL3IFY versions</string>
