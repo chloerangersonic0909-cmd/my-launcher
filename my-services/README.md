@@ -27,3 +27,18 @@ Initial backend foundation for the My Launcher ecosystem. This service is separa
 Set `DATABASE_URL`, `JWT_SECRET` (at least 32 random bytes), `JWT_ISSUER`, `CORS_ORIGINS`, `DATABASE_SSL=true` where required, and `PORT`. Never commit credentials. Before public registration, implement email verification, password reset, refresh-token rotation/revocation, account deletion/export, audit events, bot protection and monitoring.
 
 Microsoft/Xbox and ELY.BY remain external identity integrations. MY SERVICES must not collect their passwords or impersonate their authentication systems. This commit is a backend foundation, not a production-ready identity provider.
+
+
+## Android launcher integration
+
+The Android app contains `net.kdt.pojavlaunch.services.MyServicesClient`. It performs asynchronous HTTPS requests for core health, the service catalog and the signed-in account endpoint. The launcher checks core health during startup only when an endpoint is configured; if not configured, the launcher continues to work without the optional service.
+
+Configure the URL at build time without committing it:
+- Environment variable: `MY_SERVICES_BASE_URL=https://api.your-domain.example`
+- Or Gradle property: `-PMY_SERVICES_BASE_URL=https://api.your-domain.example`
+
+The Android build rejects non-HTTPS URLs in the client. Do not place server secrets, database credentials, OAuth client secrets or signing keys in the APK. The access-token storage is a minimal integration hook; production sign-in UI, secure token rotation and account recovery are not yet implemented.
+
+## Local Docker Compose
+
+Run `docker compose up --build` from this directory after copying `.env.example` to `.env` and replacing the example database password and JWT secret. The PostgreSQL container initializes the schema from `schema.sql`. Keep registration disabled until a real email-verification and recovery flow is deployed.
