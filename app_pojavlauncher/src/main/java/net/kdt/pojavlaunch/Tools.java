@@ -405,6 +405,10 @@ public final class Tools {
 
     public static void launchMinecraft(final AppCompatActivity activity, MinecraftAccount minecraftAccount,
                                        MinecraftProfile minecraftProfile, String versionId, int versionJavaRequirement) throws Throwable {
+        if (minecraftAccount != null && !minecraftAccount.hasMinecraftProfile) {
+            Toast.makeText(activity, R.string.minecraft_no_username_set, Toast.LENGTH_LONG).show();
+            return;
+        }
         int freeDeviceMemory = getFreeDeviceMemory(activity);
         int localeString;
         int freeAddressSpace = Architecture.is32BitsDevice() ? getMaxContinuousAddressSpaceSize() : -1;
@@ -1873,11 +1877,11 @@ public final class Tools {
 
     public static boolean isLocalProfile(Context ctx){
         MinecraftAccount currentProfile = PojavProfile.getCurrentProfileContent(ctx, null);
-        return currentProfile == null || currentProfile.isLocal();
+        return currentProfile == null || currentProfile.isLocal() || !currentProfile.hasMinecraftProfile;
     }
     public static boolean hasOnlineProfile(){
         for (MinecraftAccount accountToCheck : getAllProfiles()) {
-            if (!accountToCheck.isLocal() && !accountToCheck.isDemo()) {
+            if (!accountToCheck.isLocal() && !accountToCheck.isDemo() && accountToCheck.hasMinecraftProfile) {
                 return true;
             }
         }
