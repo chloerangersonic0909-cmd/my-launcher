@@ -73,26 +73,37 @@ public class CurseforgeApi implements ModpackApi{
         if(dataArray == null) return null;
         JsonObject paginationInfo = response.getAsJsonObject("pagination");
         ArrayList<ModItem> modItemList = new ArrayList<>(dataArray.size());
-        for(int i = 0; i < dataArray.size(); i++) {
+        for (int i = 0; i < dataArray.size(); i++) {
+            if (!dataArray.get(i).isJsonObject()) continue;
             JsonObject dataElement = dataArray.get(i).getAsJsonObject();
             JsonElement allowModDistribution = dataElement.get("allowModDistribution");
-            // Gson automatically casts null to false, which leans to issues
-            // So, only check the distribution flag if it is non-null
-            if(!allowModDistribution.isJsonNull() && !allowModDistribution.getAsBoolean()) {
-                Log.i("CurseforgeApi", "Skipping modpack "+dataElement.get("name").getAsString() + " because curseforge sucks");
+            // CurseForge may omit this optional field; only an explicit false blocks distribution.
+            if (allowModDistribution != null && !allowModDistribution.isJsonNull()
+                    && !allowModDistribution.getAsBoolean()) {
+                Log.i("CurseforgeApi", "Skipping item because distribution is disabled: "
+                        + GsonJsonUtils.getStringSafe(dataElement, "name"));
                 continue;
             }
+
+            JsonElement id = dataElement.get("id");
+            JsonElement name = dataElement.get("name");
+            if (id == null || id.isJsonNull() || name == null || name.isJsonNull()) continue;
+
+            JsonObject logo = GsonJsonUtils.getJsonObjectSafe(dataElement, "logo");
+            String imageUrl = logo == null ? null : GsonJsonUtils.getStringSafe(logo, "thumbnailUrl");
             ModItem modItem = new ModItem(Constants.SOURCE_CURSEFORGE,
                     searchFilters.isModpack,
-                    dataElement.get("id").getAsString(),
-                    dataElement.get("name").getAsString(),
-                    dataElement.get("summary").getAsString(),
-                    dataElement.getAsJsonObject("logo").get("thumbnailUrl").getAsString());
+                    id.getAsString(),
+                    name.getAsString(),
+                    GsonJsonUtils.getStringSafe(dataElement, "summary"),
+                    imageUrl);
             modItemList.add(modItem);
         }
-        if(curseforgeSearchResult == null) curseforgeSearchResult = new CurseforgeSearchResult();
+        if (curseforgeSearchResult == null) curseforgeSearchResult = new CurseforgeSearchResult();
         curseforgeSearchResult.results = modItemList.toArray(new ModItem[0]);
-        curseforgeSearchResult.totalResultCount = paginationInfo.get("totalCount").getAsInt();
+        JsonElement totalCount = paginationInfo == null ? null : paginationInfo.get("totalCount");
+        curseforgeSearchResult.totalResultCount = totalCount == null || totalCount.isJsonNull()
+                ? curseforgeSearchResult.previousOffset + dataArray.size() : totalCount.getAsInt();
         curseforgeSearchResult.previousOffset += dataArray.size();
         return curseforgeSearchResult;
 
