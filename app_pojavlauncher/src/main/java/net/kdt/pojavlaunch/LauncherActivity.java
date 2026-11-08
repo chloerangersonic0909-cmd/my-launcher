@@ -56,6 +56,7 @@ import net.kdt.pojavlaunch.prefs.screens.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.progresskeeper.TaskCountListener;
 import net.kdt.pojavlaunch.services.ProgressServiceKeeper;
+import net.kdt.pojavlaunch.services.MyServicesClient;
 import net.kdt.pojavlaunch.tasks.AsyncAssetManager;
 import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
 import net.kdt.pojavlaunch.tasks.AsyncVersionList;
@@ -385,6 +386,17 @@ public class LauncherActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pojav_launcher);
+        // MY SERVICES is optional until a production HTTPS endpoint is configured at build time.
+        if (MyServicesClient.isConfigured()) {
+            MyServicesClient.checkHealth(new MyServicesClient.Callback<org.json.JSONObject>() {
+                @Override public void onSuccess(org.json.JSONObject status) {
+                    Log.i("MyServices", "Core connected: " + status.optString("version", "unknown"));
+                }
+                @Override public void onError(String code, String message) {
+                    Log.w("MyServices", "Core unavailable (" + code + "): " + message);
+                }
+            });
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         // If we don't have a back stack root yet...
         if(fragmentManager.getBackStackEntryCount() < 1) {
