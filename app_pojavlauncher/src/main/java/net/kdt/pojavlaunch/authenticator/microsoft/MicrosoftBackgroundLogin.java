@@ -90,8 +90,12 @@ public class MicrosoftBackgroundLogin {
                     // A Microsoft/Xbox account alone does not prove Minecraft Java Edition ownership.
                     // Bedrock-only entitlements must never be accepted by this Java launcher.
                     throw new PresentedException(R.string.minecraft_not_owned);
-                } else if (!hasProfile) {
-                    throw new PresentedException(R.string.minecraft_no_username_set);
+                }
+                if (!hasProfile) {
+                    // Let the user finish signing in and keep the Microsoft account in the launcher.
+                    // A real Java profile is still required before the game can be launched.
+                    mcName = "Microsoft-" + xsts[0];
+                    mcUuid = "00000000-0000-0000-0000-000000000000";
                 } else if (mcName == null || mcUuid == null) {
                     throw new IllegalStateException("This should never happen, please report this as a bug");
                 }
@@ -104,6 +108,7 @@ public class MicrosoftBackgroundLogin {
                 acc.username = mcName;
                 acc.profileId = mcUuid;
                 acc.isMicrosoft = true;
+                acc.hasMinecraftProfile = hasProfile;
                 acc.msaRefreshToken = msRefreshToken;
                 acc.expiresAt = expiresAt;
                 acc.updateSkinFace();
