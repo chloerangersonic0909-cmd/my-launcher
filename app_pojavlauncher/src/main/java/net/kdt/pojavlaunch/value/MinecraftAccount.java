@@ -26,6 +26,7 @@ public class MinecraftAccount {
     public String username = "Steve";
     public String selectedVersion = "1.7.10";
     public boolean isMicrosoft = false;
+    public boolean isElyBy = false;
     public String msaRefreshToken = "0";
     public String xuid;
     public long expiresAt;
@@ -39,9 +40,14 @@ public class MinecraftAccount {
             
             Log.i("SkinLoader", "Update skin face success");
         } catch (IOException e) {
-            // Skin refresh limit, no internet connection, etc...
-            // Simply ignore updating skin face
-            Log.w("SkinLoader", "Could not update skin face", e);
+            // If a profile has no published skin (or the head service is temporarily unavailable),
+            // keep a predictable default Steve avatar instead of leaving the account image blank.
+            Log.w("SkinLoader", "Could not update skin face; using the default avatar", e);
+            try {
+                Tools.downloadFile("https://mc-heads.net/head/Steve/100", skinFile.getAbsolutePath());
+            } catch (IOException fallbackError) {
+                Log.w("SkinLoader", "Could not download the default avatar either", fallbackError);
+            }
         }
     }
 
