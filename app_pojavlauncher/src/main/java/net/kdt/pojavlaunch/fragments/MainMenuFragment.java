@@ -170,19 +170,8 @@ public class MainMenuFragment extends Fragment {
     /** Hidden access to advanced game settings. The passcode is never displayed. */
     private void showAddAccountDialog() {
         if (!isAdded()) return;
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.mylauncher_add_account)
-                .setItems(new String[]{"Microsoft account", "Offline account"}, (dialog, which) -> {
-                    if (which == 0) {
-                        Tools.swapFragment(requireActivity(), MicrosoftLoginFragment.class,
-                                MicrosoftLoginFragment.TAG, null);
-                    } else {
-                        Tools.swapFragment(requireActivity(), LocalLoginFragment.class,
-                                LocalLoginFragment.TAG, null);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        Tools.swapFragment(requireActivity(), SelectAuthFragment.class,
+                SelectAuthFragment.TAG, null);
     }
 
     private void showHiddenAdvancedAccess() {
