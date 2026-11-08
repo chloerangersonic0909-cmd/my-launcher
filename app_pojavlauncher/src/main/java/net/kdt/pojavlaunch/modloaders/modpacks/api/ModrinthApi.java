@@ -74,13 +74,16 @@ public class ModrinthApi implements ModpackApi{
         ModItem[] items = new ModItem[responseHits.size()];
         for(int i=0; i<responseHits.size(); ++i){
             JsonObject hit = responseHits.get(i).getAsJsonObject();
+            String projectType = GsonJsonUtils.getStringSafe(hit, "project_type");
+            String projectId = GsonJsonUtils.getStringSafe(hit, "project_id");
+            if (projectId == null || projectId.isEmpty()) continue;
             items[i] = new ModItem(
                     Constants.SOURCE_MODRINTH,
-                    hit.get("project_type").getAsString().equals("modpack"),
-                    hit.get("project_id").getAsString(),
-                    hit.get("title").getAsString(),
-                    hit.get("description").getAsString(),
-                    hit.get("icon_url").getAsString()
+                    "modpack".equals(projectType),
+                    projectId,
+                    GsonJsonUtils.getStringSafe(hit, "title"),
+                    GsonJsonUtils.getStringSafe(hit, "description"),
+                    GsonJsonUtils.getStringSafe(hit, "icon_url")
             );
         }
         if(modrinthSearchResult == null) modrinthSearchResult = new ModrinthSearchResult();
@@ -95,7 +98,6 @@ public class ModrinthApi implements ModpackApi{
         fillInMissingModItemData(item);
         JsonArray response = mApiHandler.get(String.format("project/%s/version", item.id), JsonArray.class);
         if(response == null) return null;
-        System.out.println(response);
         String[] names = new String[response.size()];
         String[] ids = new String[response.size()];
         String[] mcNames = new String[response.size()];
@@ -106,13 +108,13 @@ public class ModrinthApi implements ModpackApi{
 
         for (int i=0; i<response.size(); ++i) {
             JsonObject version = response.get(i).getAsJsonObject();
-            names[i] = version.get("name").getAsString();
+            names[i] = GsonJsonUtils.getStringSafe(version, "name");
             JsonArray loaderArray = version.getAsJsonArray("loaders");
             if (loaderArray != null) {
                 loaders[i] = new String[loaderArray.size()];
                 for (int j = 0; j < loaderArray.size(); j++) loaders[i][j] = loaderArray.get(j).getAsString();
             }
-            ids[i] = version.get("id").getAsString();
+            ids[i] = GsonJsonUtils.getStringSafe(version, "id");
             try {
                 JsonArray dependenciesJsonArray = version.getAsJsonArray("dependencies");
                 dependencies[i] = new ModDetail.Dependencies[dependenciesJsonArray.size()];
@@ -127,17 +129,24 @@ public class ModrinthApi implements ModpackApi{
                 }
             } catch (Exception ignored) {}
 
-            mcNames[i] = version.get("game_versions").getAsJsonArray().get(0).getAsString();
-            urls[i] = version.get("files").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString();
-            // Assume there may not be hashes, in case the API changes
-            JsonObject hashesMap = version.getAsJsonArray("files").get(0).getAsJsonObject()
-                    .get("hashes").getAsJsonObject();
-            if(hashesMap == null || hashesMap.get("sha1") == null){
+            JsonArray gameVersions = version.getAsJsonArray("game_versions");
+            if (gameVersions != null && gameVersions.size() > 0
+                    && !gameVersions.get(0).isJsonNull()) {
+                mcNames[i] = gameVersions.get(0).getAsString();
+            }
+
+            JsonArray files = version.getAsJsonArray("files");
+            if (files == null || files.size() == 0 || !files.get(0).isJsonObject()) {
+                urls[i] = null;
                 hashes[i] = null;
                 continue;
             }
 
-            hashes[i] = hashesMap.get("sha1").getAsString();
+            JsonObject primaryFile = files.get(0).getAsJsonObject();
+            urls[i] = GsonJsonUtils.getStringSafe(primaryFile, "url");
+            // Hashes are optional in the API; absence must not break the version list.
+            JsonObject hashesMap = GsonJsonUtils.getJsonObjectSafe(primaryFile, "hashes");
+            hashes[i] = hashesMap == null ? null : GsonJsonUtils.getStringSafe(hashesMap, "sha1");
         }
 
         ModDetail detail = new ModDetail(item, names, ids, mcNames, urls, hashes, dependencies);
