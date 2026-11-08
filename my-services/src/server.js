@@ -19,7 +19,7 @@ app.use(cors({origin(origin,cb){if(!origin||origins.includes(origin))return cb(n
 app.use(express.json({limit:"32kb"}));
 app.use("/v1/auth",rateLimit({windowMs:900000,limit:20,standardHeaders:true,legacyHeaders:false}));
 const wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next);
-const emailOk=v=>typeof v==="string"&&v.length<=254&&/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v);
+const emailOk=v=>typeof v==="string"&&v.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const usernameOk=v=>typeof v==="string"&&/^[a-zA-Z0-9_]{3,20}$/.test(v);
 async function requireAuth(req,res,next){try{const h=req.get("authorization")||"";if(!h.startsWith("Bearer "))return res.status(401).json({error:"authentication_required"});const {payload}=await jwtVerify(h.slice(7),jwtKey,{issuer,audience:"my-services-api"});const q=await pool.query("SELECT id,email,username,status,email_verified FROM users WHERE id=$1",[payload.sub]);const u=q.rows[0];if(!u||u.status!=="active"||!u.email_verified)return res.status(401).json({error:"account_unavailable"});req.user=u;next();}catch{return res.status(401).json({error:"invalid_or_expired_token"});}}
 app.get("/health",wrap(async(_req,res)=>{await pool.query("SELECT 1");res.json({status:"ok",service:"MY SERVICES",component:"My Launcher Core",version:"0.1.0"});}));
