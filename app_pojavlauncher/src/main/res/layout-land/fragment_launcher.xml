@@ -247,7 +247,7 @@
             android:layout_marginTop="7dp"
             android:background="@drawable/mylauncher_dark_card"
             android:drawableStart="@drawable/ic_add_modded"
-            android:text="Mods & Modpacks"
+            android:text="Mods &amp; Modpacks"
             android:textColor="#E1EBDD"
             android:textAllCaps="false" />
 
