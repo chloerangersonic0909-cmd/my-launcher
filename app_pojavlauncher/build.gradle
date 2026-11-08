@@ -54,7 +54,14 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
+        def myServicesUrl = (System.getenv("MY_SERVICES_BASE_URL") ?: project.findProperty("MY_SERVICES_BASE_URL") ?: "").toString().trim()
+        if (myServicesUrl.endsWith("/")) myServicesUrl = myServicesUrl.substring(0, myServicesUrl.length() - 1)
+        buildConfigField "String", "MY_SERVICES_BASE_URL", "\"${myServicesUrl}\""
         applicationId "org.angelauramc.amethyst"
         minSdkVersion 21
         targetSdkVersion 34
